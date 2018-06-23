@@ -4,15 +4,16 @@ from flask_login import login_user, logout_user, login_required, \
 from . import auth
 from .. import db
 from ..models import User
-from ..email import send_email
+from ..email import send_email  # 从叔叔那里导入send_mail函数? 为什么说是叔叔? 因为和父级目录平级.
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm,\
     PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm
 
 
-@auth.before_app_request
+# @auth.before_app_request  # before_app_request的意思是, 所有的模块都会接受这个检查. 而不单是 auth 模块.
 def before_request():
     if current_user.is_authenticated:
         current_user.ping()
+        # 如果不是 auth 模块, 如果不是static 模块, 那么重定向到待确认的界面
         if not current_user.confirmed \
                 and request.endpoint \
                 and request.endpoint[:5] != 'auth.' \
@@ -56,10 +57,11 @@ def register():
                     password=form.password.data)
         db.session.add(user)
         db.session.commit()
-        token = user.generate_confirmation_token()
-        send_email(user.email, 'Confirm Your Account',
-                   'auth/email/confirm', user=user, token=token)
-        flash('A confirmation email has been sent to you by email.')
+        # 先把邮箱确认的功能关掉
+        # token = user.generate_confirmation_token()
+        # send_email(user.email, 'Confirm Your Account',
+        #            'auth/email/confirm', user=user, token=token)
+        # flash('A confirmation email has been sent to you by email.')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
 

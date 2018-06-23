@@ -52,6 +52,9 @@ class Role(db.Model):
 
 
 class Follow(db.Model):
+    """
+    关注表, 用于社交网络
+    """
     __tablename__ = 'follows'
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'),
                             primary_key=True)
@@ -71,7 +74,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(64))
     location = db.Column(db.String(64))
     about_me = db.Column(db.Text())
-    member_since = db.Column(db.DateTime(), default=datetime.utcnow)
+    member_since = db.Column(db.DateTime(), default=datetime.utcnow) # 注册时间
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     avatar_hash = db.Column(db.String(32))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
@@ -120,14 +123,14 @@ class User(UserMixin, db.Model):
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
-            if self.email == current_app.config['FLASKY_ADMIN']:
+            if self.email == current_app.config['FLASKY_ADMIN']:  # 如果是管理员, 那么分配管理员角色
                 self.role = Role.query.filter_by(permissions=0xff).first()
-            if self.role is None:
+            if self.role is None:  # 如果不是管理员, 分配一个默认角色.
                 self.role = Role.query.filter_by(default=True).first()
-        if self.email is not None and self.avatar_hash is None:
+        if self.email is not None and self.avatar_hash is None:  # 根据邮箱生成一个头像hash.
             self.avatar_hash = hashlib.md5(
                 self.email.encode('utf-8')).hexdigest()
-        self.followed.append(Follow(followed=self))
+        self.followed.append(Follow(followed=self))  # 自己关注自己.
 
     @property
     def password(self):
@@ -142,7 +145,7 @@ class User(UserMixin, db.Model):
 
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'confirm': self.id})
+        return s.dumps({'confirm': self.id})  # 把一个字典加密成为json字符串.
 
     def confirm(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])
@@ -202,7 +205,7 @@ class User(UserMixin, db.Model):
     def is_administrator(self):
         return self.can(Permission.ADMINISTER)
 
-    def ping(self):
+    def ping(self):  # 这个方法的作用是, 更新上次访问的时间.
         self.last_seen = datetime.utcnow()
         db.session.add(self)
 
@@ -382,3 +385,67 @@ class Comment(db.Model):
 
 
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
+
+
+class CommonModelMixin:
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow())
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow())
+
+
+class Word(db.Model, CommonModelMixin):
+    __tablename__ = 'words'
+    word = db.Column(db.String(32), index=True, nullable=False)  # 一个单词.
+
+    @staticmethod
+    def create_word(word_str):
+        word = Word()
+        word.word = word_str
+        db.session.add(word)
+        db.session.flush()
+        return word
+
+
+
+
+
+
+class WordInterpretation(db.Model, CommonModelMixin):
+    __tablename__ = 'word_interpretation'
+
+    WORD_TYPE = {
+        'n', 'v', 'adj', 'adv', 'others', 'unknown'
+    }
+    word_id = db.Column(db.Integer, index=True)  # 一个单词的id.
+    type = db.Column(db.String(8), index=True, default='unknown')
+    interpretation = db.Column(db.String(1024), nullable=False)
+
+
+    @staticmethod
+    def create_word_interpretation(word, type, interpretation):
+        word_interpretation = WordInterpretation()
+        word_interpretation.word_id = word.id
+        word_interpretation.type = type
+        word_interpretation.interpretation = interpretation
+        db.session.add(word_interpretation)
+        db.session.flush()
+        return word_interpretation
+
+
+
+class Sentence(db.Model, CommonModelMixin):
+    __tablename__ = 'sentences'
+    # word_id = db.Column(db.Integer, index=True)  # 一个单词的id.
+    sentence = db.Column(db.String(1024), nullable=False)
+
+
+class Passage(db.Model, CommonModelMixin):
+    __tablename__ = 'passages'
+    passage = db.Column(db.Text, nullable=False)
+
+
+class WordsInSentence(db.Model, CommonModelMixin):
+    __tablename__ = 'words_in_sentence'  # 一个句子出现在哪些单词里面. 反过来也可以查一个句子里包含哪些单词
+    word_id = db.Column(db.Integer, index=True)  # 一个单词的id.
+    sentence_id = db.Column(db.Integer, index=True)  # 一个句子的id.
+

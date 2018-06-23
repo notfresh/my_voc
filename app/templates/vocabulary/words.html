@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %} {# 这句话说明了什么? 一个html被当做python脚本来看待. 只不过在jinja模板里, 使用特定的语法 #}
+
+{% block title %}My Vocabulary{% endblock %}
+
+{% block page_content %}
+<div>
+    {{ wtf.quick_form(form) }}
+</div>
+<div class="post-tabs">
+    {% include 'vocabulary/_words.html' %} {# 所有的引用都假设当前根目录是 templates文件夹 #}
+</div>
+{% if pagination %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.words') }} {# 当前蓝图下的words endpoint #}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}

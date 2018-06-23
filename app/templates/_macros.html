@@ -1,6 +1,7 @@
 {% macro pagination_widget(pagination, endpoint, fragment='') %}
 <ul class="pagination">
     <li{% if not pagination.has_prev %} class="disabled"{% endif %}>
+    {# 写的这么长, 只是为了设置href #}
         <a href="{% if pagination.has_prev %}{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}{{ fragment }}{% else %}#{% endif %}">
             &laquo;
         </a>

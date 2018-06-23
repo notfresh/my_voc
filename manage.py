@@ -1,20 +1,9 @@
 #!/usr/bin/env python
 import os
-COV = None
-if os.environ.get('FLASK_COVERAGE'):
-    import coverage
-    COV = coverage.coverage(branch=True, include='app/*')
-    COV.start()
-
-if os.path.exists('.env'):
-    print('Importing environment from .env...')
-    for line in open('.env'):
-        var = line.strip().split('=')
-        if len(var) == 2:
-            os.environ[var[0]] = var[1]
+from openpyxl import load_workbook
 
 from app import create_app, db
-from app.models import User, Follow, Role, Permission, Post, Comment
+from app.models import User, Follow, Role, Permission, Post, Comment, Word, WordInterpretation
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
@@ -30,35 +19,78 @@ manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
 
-@manager.command
-def test(coverage=False):
-    """Run the unit tests."""
-    if coverage and not os.environ.get('FLASK_COVERAGE'):
-        import sys
-        os.environ['FLASK_COVERAGE'] = '1'
-        os.execvp(sys.executable, [sys.executable] + sys.argv)
-    import unittest
-    tests = unittest.TestLoader().discover('tests')
-    unittest.TextTestRunner(verbosity=2).run(tests)
-    if COV:
-        COV.stop()
-        COV.save()
-        print('Coverage Summary:')
-        COV.report()
-        basedir = os.path.abspath(os.path.dirname(__file__))
-        covdir = os.path.join(basedir, 'tmp/coverage')
-        COV.html_report(directory=covdir)
-        print('HTML version: file://%s/index.html' % covdir)
-        COV.erase()
+def command_list_routes(name):
+    from colorama import init, Fore
+    from tabulate import tabulate
+    init()
+    table = []
+    for rule in app.url_map.iter_rules():
+        table.append([
+            Fore.BLUE + rule.endpoint,
+            Fore.GREEN + ','.join(rule.methods),
+            Fore.YELLOW + rule.rule])
+
+    print(tabulate(sorted(table),
+                   headers=(
+                       Fore.BLUE + 'End Point(method name)',
+                       Fore.GREEN + 'Allowed Methods',
+                       Fore.YELLOW + 'Routes'
+                   ), showindex="always", tablefmt="grid"))
 
 
 @manager.command
-def profile(length=25, profile_dir=None):
-    """Start the application under the code profiler."""
-    from werkzeug.contrib.profiler import ProfilerMiddleware
-    app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[length],
-                                      profile_dir=profile_dir)
-    app.run()
+def routes():
+    command_list_routes('API Routes')
+
+@manager.command
+def import_words():
+    wb = load_workbook(filename='init_data/words.xlsx')
+    ws = wb.active
+    rows = ws.max_row
+    last_word = None
+    for row in range(2, rows):
+        try:
+            word = ws['A{}'.format(row)].value
+            type = ws['B{}'.format(row)].value
+            interpretation = ws['C{}'.format(row)].value
+            """
+            word, type, interpretation, word not duplicated: pass : 标准
+            , type, interpretation, last_word: pass
+            , type, interpretation, last_word=None: pass
+            , , , ignore
+            """
+            if (word and word.strip()) and (type and type.strip()) and ( interpretation and interpretation.strip()) \
+                and Word.query.filter(Word.word == word).count() < 1:
+                word = word.strip()
+                type = type.strip()
+                interpretation = interpretation.strip()
+                word_obj = Word()
+                word_obj.word = word
+                db.session.add(word_obj)
+                db.session.flush()
+                last_word = word_obj
+
+                word_interpretation = WordInterpretation()
+                word_interpretation.word_id = word_obj.id
+                word_interpretation.type = type
+                word_interpretation.interpretation = interpretation
+                db.session.add(word_interpretation)
+
+            elif (type and type.strip()) and (interpretation and interpretation.strip()) \
+                and last_word:
+                type = type.strip()
+                interpretation = interpretation.strip()
+                word_interpretation = WordInterpretation()
+                word_interpretation.word_id = last_word.id
+                word_interpretation.type = type
+                word_interpretation.interpretation = interpretation
+                db.session.add(word_interpretation)
+            else:
+                pass
+        except Exception as e:
+            print('{}行数据有问题!!'.format(row))
+            raise(e)
+    db.session.commit()
 
 
 @manager.command

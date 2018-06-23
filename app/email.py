@@ -1,7 +1,7 @@
 from threading import Thread
 from flask import current_app, render_template
 from flask_mail import Message
-from . import mail
+from . import mail  #从 __int__.py里面导入, 这个说明了以下两个函数,不在这个package里.
 
 
 def send_async_email(app, msg):

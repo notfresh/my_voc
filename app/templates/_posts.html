@@ -1,6 +1,7 @@
 <ul class="posts">
     {% for post in posts %}
     <li class="post">
+        <!-- 使用左右分栏的栅格布局. -->
         <div class="post-thumbnail">
             <a href="{{ url_for('.user', username=post.author.username) }}">
                 <img class="img-rounded profile-thumbnail" src="{{ post.author.gravatar(size=40) }}">
