@@ -3,7 +3,14 @@
     <li class="post">
         <div class="post-content">
             <div class="post-body">
-                {{ word.word }}
+                <p>
+                    <span class="h4">{{ word.word }}</span>
+                    <br>
+                    {% for item in word.interpretations%}
+                        <span class="small" style="font-style: italic">{{ item.type}}</span>
+                        <span >{{ item.interpretation }}</span><br>
+                    {% endfor %}
+                </p>
             </div>
         </div>
     </li>

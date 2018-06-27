@@ -5,9 +5,6 @@
 {% block title %}My Vocabulary{% endblock %}
 
 {% block page_content %}
-<div>
-    {{ wtf.quick_form(form) }}
-</div>
 <div class="post-tabs">
     {% include 'vocabulary/_words.html' %} {# 所有的引用都假设当前根目录是 templates文件夹 #}
 </div>

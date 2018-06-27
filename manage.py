@@ -9,7 +9,7 @@ from flask_migrate import Migrate, MigrateCommand
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 manager = Manager(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, compare_type=True) # 检查类型, 字段长度的变化
 
 
 def make_shell_context():

@@ -1,5 +1,7 @@
 from datetime import datetime
 import hashlib
+
+from sqlalchemy import ForeignKey
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from markdown import markdown
@@ -389,13 +391,14 @@ db.event.listen(Comment.body, 'set', Comment.on_changed_body)
 
 class CommonModelMixin:
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow())
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow())
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Word(db.Model, CommonModelMixin):
     __tablename__ = 'words'
     word = db.Column(db.String(32), index=True, nullable=False)  # 一个单词.
+    interpretations = db.relationship('WordInterpretation', backref='word')
 
     @staticmethod
     def create_word(word_str):
@@ -406,17 +409,13 @@ class Word(db.Model, CommonModelMixin):
         return word
 
 
-
-
-
-
 class WordInterpretation(db.Model, CommonModelMixin):
     __tablename__ = 'word_interpretation'
 
     WORD_TYPE = {
         'n', 'v', 'adj', 'adv', 'others', 'unknown'
     }
-    word_id = db.Column(db.Integer, index=True)  # 一个单词的id.
+    word_id = db.Column(db.Integer, db.ForeignKey('words.id'), index=True )  # 一个单词的id.
     type = db.Column(db.String(8), index=True, default='unknown')
     interpretation = db.Column(db.String(1024), nullable=False)
 
