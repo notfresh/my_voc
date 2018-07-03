@@ -1,4 +1,5 @@
 import pprint
+from collections import OrderedDict
 
 from app import db
 from app.models import Word
@@ -46,9 +47,9 @@ itp: N-PLURAL | You can refer to educational subjects or courses that contain se
 
 def parse_word(word_str):
     lines = [item for item in word_str.replace('\r', '').split('\n') if item.strip()]
-    current_word = {}
+    current_word = OrderedDict()
     itp_list = []
-    current_itp = {}
+    current_itp = OrderedDict()
 
     for item in lines:
         item = item.strip()
@@ -71,7 +72,7 @@ def parse_word(word_str):
     return current_word
 
 
-def word_to_dict(word):
+def word_to_str(word):
     pass
     str_word = ''
     line_feed = '\r\n'
@@ -85,5 +86,5 @@ def word_to_dict(word):
 
 if __name__ == '__main__':
     word = db.session.query(Word).filter(Word.word == 'study').first()
-    dict_word = word_to_dict(word)
+    dict_word = word_to_str(word)
     print(dict_word)

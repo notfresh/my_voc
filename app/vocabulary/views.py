@@ -1,9 +1,9 @@
 from flask import render_template, request, redirect, url_for, flash
 
 from app import db
-from app.exceptions import DataError
+from app.exceptions import DataError, error_dict
 from app.models import Word, WordInterpretation, WordIPEAP
-from app.util import parse_word, word_to_dict
+from app.util import parse_word, word_to_str
 from .form import CreateWordForm, UpdateWordForm
 from . import voc
 
@@ -59,13 +59,25 @@ def update_word(word):
     form = UpdateWordForm()
     if request.method == 'GET':
         w = Word.query.filter(Word.word == word).first()
-        word_str = word_to_dict(w)
+        word_str = word_to_str(w)
         form.interpretation.data = word_str
         return render_template('vocabulary/update_word.html', form=form, word_str=word_str, word=word)
     elif form.validate_on_submit():
-
-
-
+        interpretation = form.interpretation.data
+        dict_word = parse_word(interpretation)
+        try:
+            word_obj = db.session.query(Word).filter(Word.word == dict_word['w']).first()
+            if not word_obj:
+                raise DataError('WORD_NOT_FOUND', error_dict['WORD_NOT_FOUND'])
+            db.session.query(WordIPEAP).filter(WordIPEAP.word_id == word_obj.id).delete()
+            db.session.query(WordInterpretation).filter(WordInterpretation.word_id == word_obj.id).delete()
+            for itp_item in dict_word.get('itp') or []:
+                itp_obj = WordInterpretation.create_word_interpretation(word_obj, itp_item['itp_type'], itp_item['itp_str'])
+                for eap_item in itp_item.get('eap') or []:
+                    WordIPEAP.create_word_ipeap(itp_obj, eap_item)
+            return redirect(url_for('.words'))
+        except DataError as e:
+            flash(e.msg)
 
 
 @voc.route('/delete_word/<string:word>', methods=['GET', 'POST'])

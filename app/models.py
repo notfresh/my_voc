@@ -441,13 +441,14 @@ class WordInterpretation(db.Model, CommonModelMixin):
 
 class WordIPEAP(db.Model, CommonModelMixin):
     __tablename__ = 'word_interpretation_examples'
-
+    word_id = db.Column(db.Integer, db.ForeignKey('words.id'), index=True)  # 一个单词的id.
     interpretation_id = db.Column(db.Integer, db.ForeignKey('word_interpretation.id'), index=True)  # 一个单词解释的id.
     example = db.Column(db.String(1024), nullable=False)
 
     @staticmethod
     def create_word_ipeap(interepation_obj, example_str):
         example = WordIPEAP()
+        example.word_id = interepation_obj.word_id
         example.interpretation_id = interepation_obj.id
         example.example = example_str
         db.session.add(example)
