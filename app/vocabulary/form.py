@@ -1,8 +1,14 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, TextAreaField
 
 
 class CreateWordForm(FlaskForm):
     word = StringField('word')
-    interpretation = StringField('interpretation')
+    interpretation = TextAreaField('interpretation')
+    submit = SubmitField('Submit')
+
+
+class UpdateWordForm(FlaskForm):
+    word = StringField('word')
+    interpretation = TextAreaField('interpretation')
     submit = SubmitField('Submit')

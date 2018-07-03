@@ -1,15 +1,14 @@
 from datetime import datetime
 import hashlib
 
-from sqlalchemy import ForeignKey
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from markdown import markdown
 import bleach
 from flask import current_app, request, url_for
 from flask_login import UserMixin, AnonymousUserMixin
-from app.exceptions import ValidationError
-from . import db, login_manager
+from app.exceptions import ValidationError, DataError, error_dict
+from app import db, login_manager
 
 
 class Permission:
@@ -23,7 +22,7 @@ class Permission:
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
+    name = db.Column(db.String(256), unique=True)
     default = db.Column(db.Boolean, default=False, index=True)
     permissions = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
@@ -76,7 +75,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(64))
     location = db.Column(db.String(64))
     about_me = db.Column(db.Text())
-    member_since = db.Column(db.DateTime(), default=datetime.utcnow) # 注册时间
+    member_since = db.Column(db.DateTime(), default=datetime.utcnow)  # 注册时间
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     avatar_hash = db.Column(db.String(32))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
@@ -202,7 +201,7 @@ class User(UserMixin, db.Model):
 
     def can(self, permissions):
         return self.role is not None and \
-            (self.role.permissions & permissions) == permissions
+               (self.role.permissions & permissions) == permissions
 
     def is_administrator(self):
         return self.can(Permission.ADMINISTER)
@@ -241,7 +240,7 @@ class User(UserMixin, db.Model):
 
     @property
     def followed_posts(self):
-        return Post.query.join(Follow, Follow.followed_id == Post.author_id)\
+        return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
             .filter(Follow.follower_id == self.id)
 
     def to_json(self):
@@ -281,6 +280,7 @@ class AnonymousUser(AnonymousUserMixin):
 
     def is_administrator(self):
         return False
+
 
 login_manager.anonymous_user = AnonymousUser
 
@@ -388,6 +388,10 @@ class Comment(db.Model):
 
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
 
+from datetime import datetime
+
+from app import db
+
 
 class CommonModelMixin:
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -397,13 +401,17 @@ class CommonModelMixin:
 
 class Word(db.Model, CommonModelMixin):
     __tablename__ = 'words'
-    word = db.Column(db.String(32), index=True, nullable=False)  # 一个单词.
-    interpretations = db.relationship('WordInterpretation', backref='word')
+    word = db.Column(db.String(64), index=True, nullable=False)  # 一个单词.
+    interpretations = db.relationship('WordInterpretation', cascade='all, delete-orphan', backref=db.backref('word'))
 
     @staticmethod
     def create_word(word_str):
+        word_str_strip = word_str.strip() if word_str else ''
+        w = db.session.query(Word).filter(Word.word == word_str_strip).first()
+        if w:
+            raise DataError(10000, error_dict[10000])
         word = Word()
-        word.word = word_str
+        word.word = word_str.strip()
         db.session.add(word)
         db.session.flush()
         return word
@@ -415,10 +423,10 @@ class WordInterpretation(db.Model, CommonModelMixin):
     WORD_TYPE = {
         'n', 'v', 'adj', 'adv', 'others', 'unknown'
     }
-    word_id = db.Column(db.Integer, db.ForeignKey('words.id'), index=True )  # 一个单词的id.
-    type = db.Column(db.String(8), index=True, default='unknown')
+    word_id = db.Column(db.Integer, db.ForeignKey('words.id'), index=True)  # 一个单词的id.
+    type = db.Column(db.String(24), index=True, default='unknown')
     interpretation = db.Column(db.String(1024), nullable=False)
-
+    examples = db.relationship('WordIPEAP', cascade='all, delete-orphan', backref=db.backref('interpretation'))
 
     @staticmethod
     def create_word_interpretation(word, type, interpretation):
@@ -431,10 +439,25 @@ class WordInterpretation(db.Model, CommonModelMixin):
         return word_interpretation
 
 
+class WordIPEAP(db.Model, CommonModelMixin):
+    __tablename__ = 'word_interpretation_examples'
+
+    interpretation_id = db.Column(db.Integer, db.ForeignKey('word_interpretation.id'), index=True)  # 一个单词解释的id.
+    example = db.Column(db.String(1024), nullable=False)
+
+    @staticmethod
+    def create_word_ipeap(interepation_obj, example_str):
+        example = WordIPEAP()
+        example.interpretation_id = interepation_obj.id
+        example.example = example_str
+        db.session.add(example)
+        db.session.flush()
+        return example
+
 
 class Sentence(db.Model, CommonModelMixin):
     __tablename__ = 'sentences'
-    # word_id = db.Column(db.Integer, index=True)  # 一个单词的id.
+    # word_id = db.Column(db.Integer, index=True)  # 一个单词的id. 一个句子里包含多个单词, 所以, 这里搞1对多不合适.
     sentence = db.Column(db.String(1024), nullable=False)
 
 
@@ -447,4 +470,5 @@ class WordsInSentence(db.Model, CommonModelMixin):
     __tablename__ = 'words_in_sentence'  # 一个句子出现在哪些单词里面. 反过来也可以查一个句子里包含哪些单词
     word_id = db.Column(db.Integer, index=True)  # 一个单词的id.
     sentence_id = db.Column(db.Integer, index=True)  # 一个句子的id.
+
 

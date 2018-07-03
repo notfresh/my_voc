@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}My Vocabulary-Word{% endblock %}
+
+{% block page_content %}
+    {#
+这个页面里面应该有啥呢, 假设一下
+1. 有这个词语.
+2. 有这个词语的解释
+3. 每种解释的例句.
+4. 删除这个词的按钮. 它会删除这个词, 关于这个词的解释. 每个解释的例句. 想想还是有点可怕, 但是也OK.
+5. 将来会有包含这个词的句子. 这个就非常的nice了. 但是先不做
+#}
+{#    <h1> 单词本身 </h1>#}
+{#    <ol>#}
+{#        <li>#}
+{#            <p class="h3">第一个解释</p>#}
+{#            <ol>#}
+{#                <li>第一个解释的第一个例句</li>#}
+{#                <li>第一个解释的第二个例句</li>#}
+{#            </ol>#}
+{#        </li>#}
+{#        <li>#}
+{#            <p class="h3">第二个解释</p>#}
+{#            <ol>#}
+{#                <li>第二个解释的第一个例句</li>#}
+{#                <li>第二个解释的第二个例句</li>#}
+{#            </ol>#}
+{#        </li>#}
+{#    </ol>    #}
+    <h1>{{ word.word }}</h1>
+    <p><a href="{{ url_for('voc.update_word', word=word.word)}}">编辑</a></p>
+    <ol>
+       {% for item in word.interpretations%}
+        <li>
+            <p class="h5" >{{item.interpretation }} </p>
+            <ol>
+                {% for subitem in item.examples %}
+                <li> {{ subitem.example }} </li>
+                {% endfor %}
+            </ol>
+        </li>
+        {% endfor %}
+    </ol>
+    <a href="{{ url_for('voc.delete_word', word=word.word ) }}">Delete the word</a>
+{% endblock %}
+

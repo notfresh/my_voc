@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}My Vocabulary-Word{% endblock %}
+
+{% block page_content %}
+    {#
+        如何编辑一个单词呢?
+        如果给给一个单词添加解释, 给解释添加例句呢?
+        我可以约定一个格式:
+        w: apple
+        itp: N-VAR| An apple is a round fruit with smooth red, yellow, or green skin and firm white flesh.|苹果
+        eap: his ongoing search for the finest varieties of apple.
+        eap: I want an apple.
+        eap: He hemisected an apple and gave it to me.
+        eap: I twisted an apple off the tree.
+        w: study
+        itp: V-T/V-I | If you study, you spend time learning about a particular subject or subjects.
+        eap: a relaxed and happy atmosphere that will allow you to study to your full potential.
+        eap: He studied History and Economics.
+        itp: N-UNCOUNT | Study is the activity of studying. | 学习
+        eap: the use of maps and visual evidence in the study of local history.
+        itp: N-COUNT | A study of a subject is a piece of research on it. 研究
+        eap: Recent studies suggest that as many as 5 in 1,000 new mothers are likely to have this problem.
+        itp: N-PLURAL | You can refer to educational subjects or courses that contain several elements as studies of a particular kind.| 学科
+
+    #}
+    <h1>{{ word.word }}</h1>
+    <ol>
+        {% for item in word.interpretations %}
+            <li>
+                <p class="h5">{{ item.interpretation }} </p>
+                <ol>
+                    {% for subitem in item.examples %}
+                        <li> {{ subitem.example }} </li>
+                    {% endfor %}
+                </ol>
+            </li>
+        {% endfor %}
+    </ol>
+{% endblock %}
+

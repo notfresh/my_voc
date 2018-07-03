@@ -1,20 +1,25 @@
 #!/usr/bin/env python
+# coding:utf-8
 import os
-from openpyxl import load_workbook
 
-from app import create_app, db
-from app.models import User, Follow, Role, Permission, Post, Comment, Word, WordInterpretation
+from openpyxl import load_workbook
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
+from app import create_app, db
+from app.models import *
+
+
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 manager = Manager(app)
-migrate = Migrate(app, db, compare_type=True) # 检查类型, 字段长度的变化
+
+migrate = Migrate(app, db, compare_type=True)  # ,
 
 
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Follow=Follow, Role=Role,
-                Permission=Permission, Post=Post, Comment=Comment)
+    return dict(app=app, db=db, User=User, )
+
+
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
@@ -42,6 +47,7 @@ def command_list_routes(name):
 def routes():
     command_list_routes('API Routes')
 
+
 @manager.command
 def import_words():
     wb = load_workbook(filename='init_data/words.xlsx')
@@ -59,8 +65,8 @@ def import_words():
             , type, interpretation, last_word=None: pass
             , , , ignore
             """
-            if (word and word.strip()) and (type and type.strip()) and ( interpretation and interpretation.strip()) \
-                and Word.query.filter(Word.word == word).count() < 1:
+            if (word and word.strip()) and (type and type.strip()) and (interpretation and interpretation.strip()) \
+                    and Word.query.filter(Word.word == word).count() < 1:
                 word = word.strip()
                 type = type.strip()
                 interpretation = interpretation.strip()
@@ -77,7 +83,7 @@ def import_words():
                 db.session.add(word_interpretation)
 
             elif (type and type.strip()) and (interpretation and interpretation.strip()) \
-                and last_word:
+                    and last_word:
                 type = type.strip()
                 interpretation = interpretation.strip()
                 word_interpretation = WordInterpretation()
@@ -89,7 +95,7 @@ def import_words():
                 pass
         except Exception as e:
             print('{}行数据有问题!!'.format(row))
-            raise(e)
+            raise (e)
     db.session.commit()
 
 
@@ -108,6 +114,8 @@ def deploy():
     # create self-follows for all users
     User.add_self_follows()
 
+
+manager.add_command('db', MigrateCommand)
 
 if __name__ == '__main__':
     manager.run()
