@@ -54,7 +54,7 @@ def parse_word(word_str):
     for item in lines:
         item = item.strip()
         if item.startswith('w:'):
-            current_word['w'] = item.replace('w:', '')
+            current_word['w'] = item.replace('w:', '').strip()
         elif item.startswith('itp:'):
             if current_itp:
                 itp_list.append(current_itp)

@@ -7,6 +7,9 @@
         {{ form.csrf_token }}
 {#        <div>{{ form.word.label }}: {{ form.word(class="form-control", placeholder="the word") }}</div>#}
         <div>{{ form.interpretation.label}}: {{ form.interpretation(class="form-control", rows=10, placeholder=format) }}</div>
-        <div>{{ form.submit(class="btn btn-default") }}</div>
+        <div>
+            {{ form.submit(class="btn btn-default") }}
+            <a href="{{ url_for('voc.word_detail', word=word) }}"><btn class="btn btn-default">取消</btn></a>
+        </div>
     </form>
 {% endblock %}

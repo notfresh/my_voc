@@ -398,8 +398,13 @@ class CommonModelMixin:
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        dict_attr = self.__dict__
+        dict_attr_public = {item[0]: item[1] for item in dict_attr.items() if not item[0].startswith('_')} #
+        return str(dict_attr_public)
 
-class Word(db.Model, CommonModelMixin):
+
+class Word(CommonModelMixin, db.Model):
     __tablename__ = 'words'
     word = db.Column(db.String(64), index=True, nullable=False)  # 一个单词.
     interpretations = db.relationship('WordInterpretation', cascade='all, delete-orphan', backref=db.backref('word'))
@@ -417,7 +422,7 @@ class Word(db.Model, CommonModelMixin):
         return word
 
 
-class WordInterpretation(db.Model, CommonModelMixin):
+class WordInterpretation(CommonModelMixin, db.Model):
     __tablename__ = 'word_interpretation'
 
     WORD_TYPE = {

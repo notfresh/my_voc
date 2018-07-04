@@ -78,6 +78,7 @@ def update_word(word):
             return redirect(url_for('.words'))
         except DataError as e:
             flash(e.msg)
+            return redirect(url_for('.words'))
 
 
 @voc.route('/delete_word/<string:word>', methods=['GET', 'POST'])

@@ -11,7 +11,7 @@
 5. 将来会有包含这个词的句子. 这个就非常的nice了. 但是先不做
 #}
 {#    <h1> 单词本身 </h1>#}
-{#    <ol>#}
+{#    <ul>#}
 {#        <li>#}
 {#            <p class="h3">第一个解释</p>#}
 {#            <ol>#}
@@ -26,10 +26,11 @@
 {#                <li>第二个解释的第二个例句</li>#}
 {#            </ol>#}
 {#        </li>#}
-{#    </ol>    #}
+{#    </ul>    #}
     <h1>{{ word.word }}</h1>
     <p><a href="{{ url_for('voc.update_word', word=word.word)}}">编辑</a></p>
-    <ol>
+
+    <ul>
        {% for item in word.interpretations%}
         <li>
             <p class="h5" >{{item.interpretation }} </p>
@@ -40,7 +41,15 @@
             </ol>
         </li>
         {% endfor %}
-    </ol>
-    <a href="{{ url_for('voc.delete_word', word=word.word ) }}">Delete the word</a>
+    </ul>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <hr>
+    <p style="text-align: right"><a href="{{ url_for('voc.delete_word', word=word.word ) }}">Delete the word</a></p>
+
 {% endblock %}
 
