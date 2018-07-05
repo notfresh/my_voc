@@ -1,0 +1,20 @@
+{'course_name': 'Linux 基础入门（新版）', 'course_desc': '要在实验楼愉快地学习，先要熟练地使用 Linux，本实验介绍 Linux 基本操作，shell 环境下的常用命令。', 'course_view_number': '180070'}
+{'course_name': '新手指南之玩转实验楼', 'course_desc': '本实验主要通过介绍计算机相关技术的基础概念，实验楼的使用方法，面向完全没有编程经验的用户。从中我们将了解到实验楼的实验精神：“从实践切入，依靠交互性、操作性更强的课程，理论学习+动手实践共同激发你的创造力。”', 'course_view_number': '268019'}
+{'course_name': 'C语言版 Flappy Bird', 'course_desc': 'Flappy Bird 是之前十分热门的小游戏，后来出现多个衍生版本。本节课程将使用 C 语言来实现一个字符版 Flappy Bird，感受不一样的风采。本课程学习后将会熟悉C语言，以及绘图库ncurses的使用。本课程适合有C语言基础，想做练手项目的同学，可以有效的学习ncurses绘图库的使用，做一些有趣的事情。', 'course_view_number': '3464'}
+{'course_name': 'Python 生成个性二维码', 'course_desc': '二维码已经成为我们日常生活中不可或缺的一部分。在本课程中，就使用 Python 基于MyQR实现生成普通二维码，带图片的艺术二维码，动态二维码。', 'course_view_number': '316'}
+{'course_name': 'NumPy 百题大冲关', 'course_desc': 'NumPy 是 Python 语言的一个扩充程序库。支持大量高维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库。机器学习涉及到大量对数组的变换和运算，NumPy 就成了必不可少的工具之一。NumPy 百题大冲关共有 100 道练习题，不仅可以学习 NumPy 的使用，也是复习 NumPy 的必备宝典。', 'course_view_number': '3088'}
+{'course_name': '用 C 编写打字练习软件', 'course_desc': '在本课程中，我们将会制作各种各样的键盘打字练习软件，本实验所编写的程序都比较简单，但它们能加深你对计算机应用程序的理解。', 'course_view_number': '636'}
+{'course_name': 'C 语言入门教程', 'course_desc': '本课程讲解 C 语言的开发环境以及对 C 语言的剖析，引入大量的 C 语言程序案例，把算法和语法结合起来，通过引导大家由浅入深地编写 C 程序，让大家掌握 C 语言。我们将从中学会 C 语言语法、数组、模块化程序设计指针、文件的输入与输出等。', 'course_view_number': '37552'}
+{'course_name': 'Python3 简明教程', 'course_desc': '简明易懂的 Python3 课程，不仅适用于那些有其它语言基础的同学，对没有编程经验的同学也非常友好。本课程不仅讲解了 Python3 基础知识，还介绍了 PEP8、Virtualenv、测试、项目结构以及 Flask 相关内容', 'course_view_number': '27787'}
+{'course_name': 'GDB 简明教程', 'course_desc': '本课程通过动手实验学习 Linux 上 GDB 调试 C 语言程序的基本技巧。首先讲解了 GDB 的常用命令，然后通过对有问题的链表程序的调试来逐步实践挖掘程序 BUG 的过程。', 'course_view_number': '1664'}
+{'course_name': 'Linux 系统搭建及配置 DNS 服务器', 'course_desc': '本实验是在 ubuntu 系统环境下搭建一个简易的 DNS 服务器，你可以通过它来管理局域网的 ip 地址，更加方便理解和记忆。通过构建私有 DNS 服务器，来学习 linux 的运维管理， 并从中了解到一些关于的DNS小知识。 本课程适合有 Linux 基础，想学习运维或者网络开发方向的同学，可以学习本课程入门。\r\n', 'course_view_number': '921'}
+{'course_name': 'Java编程语言（新版）', 'course_desc': '本实验将介绍 Java 语言基本语法、Java 平台应用、 Java 的核心概念：JVM、JDK、JRE以及 java 面向对象思想。同时我们会学到如何在系统中搭建 Java 开发环境，以及如何利用第三方工具进行 Java 程序的开发。', 'course_view_number': '35923'}
+{'course_name': '使用 Matplotlib 绘制 2D 和 3D 图形', 'course_desc': 'Matplotlib 是支持 Python 语言的开源绘图库，因为其支持丰富的绘图类型、简单的绘图方式以及完善的接口文档，深受 Python 工程师、科研学者、数据工程师等各类人士的喜欢。Matplotlib 拥有着十分活跃的社区以及稳定的版本迭代，当我们在学习机器学习的课程时，掌握 Matplotlib 的使用无疑是最重要的准备工作之一。', 'course_view_number': '1179'}
+{'course_name': 'Scala 开发教程', 'course_desc': 'Scala 是一门多范式的编程语言，类似于 Java 。设计初衷是实现可伸缩的语言、并集成面向对象编程和函数式编程的各种特性。在本课程中，你将可以学习到 Scala 的基础语法、类和对象、基本数据类型、控制语句以及函数等方面的知识，从而更好地来编写 Scala 应用。', 'course_view_number': '5219'}
+{'course_name': 'Pandas 百题大冲关', 'course_desc': 'Pandas 是基于 NumPy 的数据处理工具，其提供了高效操作大型数据集所需的函数和方法，是数据分析中必不可少的模块。Pandas 百题大冲关共有 100 道练习题，不仅可以学习 Pandas 的使用，也是复习 Pandas 的必备宝典。', 'course_view_number': '1375'}
+{'course_name': '高德API + Python 解决租房问题', 'course_desc': '本课程使用 Python 脚本爬取某租房网站的房源信息，利用高德的 js API 在地图上标出房源地点，划出距离工作地点1小时内可到达的范围。在项目实现的过程中熟悉了 requests 、BeautifulSoup、csv 等库的简单使用。', 'course_view_number': '17065'}
+{'course_name': 'Spring MVC 简易教程', 'course_desc': 'Spring MVC 属于 SpringFrameWork 的后续产品，已经融合在 Spring Web Flow 里面，是一个强大灵活的 Web 框架。Spring MVC 提供了一个 DispatcherServlet 作为前端控制器来分配请求。通过策略接口，Spring 框架是高度可配置的。Spring MVC 还包含多种视图技术，如 Java Server Pages（JSP）、Velocity、Tiles、iText 和 POI 等。', 'course_view_number': '2083'}
+{'course_name': 'PHP 编程入门', 'course_desc': 'PHP是一种被广泛应用的开放源代码的多用途脚本语言，它可嵌入到 HTML中，尤其适合 web 开发。实验课程基于《PHP 参考手册》中文版本制作。', 'course_view_number': '13564'}
+{'course_name': 'Python 数据分析入门与进阶', 'course_desc': '在本训练营中，我们将学习怎么样使用 Python 进行数据分析。课程将从数据分析基础开始，一步步深入讲解。从 Python 的基础用法到数据分析的各种算法，并结合各种实例，讲解数据分析过程中的方方面面。', 'course_view_number': '1897'}
+{'course_name': '16 个 PHP 设计模式详解', 'course_desc': '本课程主要介绍了 16 个设计模式的相关知识，使用 UML 类图形象表示各个类之间的关系，并使用 PHP 实现示例代码。课程内容文字较多，且知识点较为抽象，学习起来有一定的难度。适合作为进阶课程学习。', 'course_view_number': '4877'}
+{'course_name': 'MySQL 基础课程', 'course_desc': '本课程实验内容从 SQL 概念开始，在 MySQL 数据库中学习并实践了 SQL 常用语法及约束、索引、视图、SELECT 查询、修改与删除等基本操作。课程包含两部分，基础部分学习 SQL 基本操作实验，进阶部分基于 MySQL 官方参考手册制作，学习 MySQL 的进阶操作。', 'course_view_number': '42785'}
