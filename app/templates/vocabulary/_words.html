@@ -5,10 +5,11 @@
             <div class="post-body">
                 <p>
                     <span class="h4"><a href="{{ url_for('voc.word_detail', word=word.word) }}">{{ word.word }}</a></span>
+                    <span >{{ word.phonetics }}</span><br>
                     <br>
-                    {% for item in word.interpretations%}
-                        <span class="small" style="font-style: italic">{{ item.type}}</span>
-                        <span >{{ item.interpretation }}</span><br>
+                    {% for i in range(0, word.interpretations|length if word.interpretations|length<3 else 3 ) %}
+                        <span class="small" style="font-style: italic">{{ word.interpretations[i].type}}</span>
+                        <span >{{ word.interpretations[i].interpretation }}</span><br>
                     {% endfor %}
                 </p>
             </div>

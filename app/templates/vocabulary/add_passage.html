@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_content %}
+    <h1>Add a passage</h1>
+    <form method="POST" action="{{ url_for('voc.add_passage') }}">
+        {{ form.csrf_token }}
+        <div>{{ form.title.label }}: {{ form.title(class="form-control", placeholder="the title") }}</div>
+        <div>{{ form.passage.label }}: {{ form.passage(class="form-control", rows=25, placeholder=format) }}</div>
+        <div>{{ form.submit(class="btn btn-default") }}</div>
+    </form>
+{% endblock %}

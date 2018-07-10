@@ -71,7 +71,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), unique=True, index=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
-    confirmed = db.Column(db.Boolean, default=False)
+    confirmed = db.Column(db.Boolean, default=True)
     name = db.Column(db.String(64))
     location = db.Column(db.String(64))
     about_me = db.Column(db.Text())
@@ -388,10 +388,6 @@ class Comment(db.Model):
 
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
 
-from datetime import datetime
-
-from app import db
-
 
 class CommonModelMixin:
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -407,18 +403,25 @@ class CommonModelMixin:
 class Word(CommonModelMixin, db.Model):
     __tablename__ = 'words'
     word = db.Column(db.String(64), index=True, nullable=False)  # 一个单词.
+    phonetics = db.Column(db.String(64))  # 发音.
+    note = db.Column(db.String(1024)) # 备注
+
     interpretations = db.relationship('WordInterpretation', cascade='all, delete-orphan', backref=db.backref('word'))
 
     @staticmethod
-    def create_word(word_str):
+    def create_word(word_str, phonetics=None, note=None, session=None):
+        if session is None:
+            session = db.session
         word_str_strip = word_str.strip() if word_str else ''
         w = db.session.query(Word).filter(Word.word == word_str_strip).first()
         if w:
             raise DataError(10000, error_dict[10000])
         word = Word()
         word.word = word_str.strip()
-        db.session.add(word)
-        db.session.flush()
+        word.phonetics = phonetics.strip() if phonetics else ''
+        word.note = note.strip() if note else ''
+        session.add(word)
+        session.flush()
         return word
 
 
@@ -429,18 +432,20 @@ class WordInterpretation(CommonModelMixin, db.Model):
         'n', 'v', 'adj', 'adv', 'others', 'unknown'
     }
     word_id = db.Column(db.Integer, db.ForeignKey('words.id'), index=True)  # 一个单词的id.
-    type = db.Column(db.String(24), index=True, default='unknown')
+    type = db.Column(db.String(64), index=True, default='unknown')
     interpretation = db.Column(db.String(1024), nullable=False)
     examples = db.relationship('WordIPEAP', cascade='all, delete-orphan', backref=db.backref('interpretation'))
 
     @staticmethod
-    def create_word_interpretation(word, type, interpretation):
+    def create_word_interpretation(word, type, interpretation, session=None):
+        if session is None:
+            session = db.session
         word_interpretation = WordInterpretation()
         word_interpretation.word_id = word.id
         word_interpretation.type = type
         word_interpretation.interpretation = interpretation
-        db.session.add(word_interpretation)
-        db.session.flush()
+        session.add(word_interpretation)
+        session.flush()
         return word_interpretation
 
 
@@ -451,13 +456,15 @@ class WordIPEAP(db.Model, CommonModelMixin):
     example = db.Column(db.String(1024), nullable=False)
 
     @staticmethod
-    def create_word_ipeap(interepation_obj, example_str):
+    def create_word_ipeap(interepation_obj, example_str, session=None):
+        if session is None:
+            session = db.session
         example = WordIPEAP()
         example.word_id = interepation_obj.word_id
         example.interpretation_id = interepation_obj.id
         example.example = example_str
-        db.session.add(example)
-        db.session.flush()
+        session.add(example)
+        session.flush()
         return example
 
 
@@ -470,6 +477,18 @@ class Sentence(db.Model, CommonModelMixin):
 class Passage(db.Model, CommonModelMixin):
     __tablename__ = 'passages'
     passage = db.Column(db.Text, nullable=False)
+    passage_short = db.Column(db.String(1024))
+    title = db.Column(db.String(128))
+
+    @classmethod
+    def create(cls, title, passage_str):
+        obj = cls()
+        obj.title = title
+        obj.passage = passage_str
+        obj.passage_short = passage_str[:300]
+        db.session.add(obj)
+        db.session.flush()
+        return obj
 
 
 class WordsInSentence(db.Model, CommonModelMixin):
@@ -478,3 +497,22 @@ class WordsInSentence(db.Model, CommonModelMixin):
     sentence_id = db.Column(db.Integer, index=True)  # 一个句子的id.
 
 
+class MyWord(CommonModelMixin, db.Model):
+    __tablename__ = 'mywords'  # 我的单词库
+    word = db.Column(db.String(64), index=True, nullable=False)  # 一个单词.
+    user_id = db.Column(db.Integer) # 谁的单词
+    set_id = db.Column(db.Integer, index=True)
+
+    @classmethod
+    def create(cls, word_str):
+        obj = cls()
+        obj.word = word_str
+        db.session.add(obj)
+        db.session.flush()
+        return obj
+
+
+
+class WordSet(CommonModelMixin, db.Model):
+    __tablename__ = 'word_set'
+    set_desc = db.Column(db.String(1024))

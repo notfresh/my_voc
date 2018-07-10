@@ -1,0 +1,9 @@
+<div class="">
+    <p>
+        {% for word in words %}
+            <span class="h5">
+                <a  href="{{ url_for('voc.word_detail', word=word.word) }}">{{ word.word }}</a></span>
+                &nbsp;&nbsp;&nbsp;
+        {% endfor %}
+    </p>
+</div>

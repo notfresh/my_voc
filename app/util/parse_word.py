@@ -2,6 +2,7 @@ import pprint
 from collections import OrderedDict
 
 from app import db
+from app.exceptions import DataError, error_dict
 from app.models import Word
 
 a = '''  
@@ -59,6 +60,8 @@ def parse_word(word_str):
             if current_itp:
                 itp_list.append(current_itp)
                 current_itp = {}
+            if '|' not in item: # 一行内以短竖线分割. 如果没有 | 划分, 说明有错.
+                raise DataError('INTERPRETATION_FAULT', error_dict['INTERPRETATION_FAULT'])
             itp_list1 = item.replace('itp:', '').split('|')  # 一行内以短竖线分割.
             current_itp['itp_type'] = itp_list1[0]
             itp_list1.pop(0)
@@ -66,9 +69,10 @@ def parse_word(word_str):
         elif item.startswith('eap:'):
             current_itp['eap'] = current_itp.get('eap') or []
             current_itp['eap'].append(item.replace('eap:', ''))
-
-    itp_list.append(current_itp)
-    current_word['itp'] = itp_list
+    if current_itp:
+        itp_list.append(current_itp)
+    if itp_list:
+        current_word['itp'] = itp_list
     return current_word
 
 

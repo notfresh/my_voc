@@ -3,6 +3,7 @@
 
 {% block page_content %}
     <h1>Update a word</h1>
+    <p><a href="{{ url_for('voc.craw_word', word=word) }}">Crawl word</a>[ your own interpretation would be lost ]</p>
     <form method="POST" action="{{ url_for('voc.update_word', word=word) }}">
         {{ form.csrf_token }}
 {#        <div>{{ form.word.label }}: {{ form.word(class="form-control", placeholder="the word") }}</div>#}

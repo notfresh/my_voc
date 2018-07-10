@@ -18,4 +18,10 @@ class A:
 
 if __name__ == '__main__':
     a = A()
+    print('-'*100)
+    print('-'*100)
     print(a)
+    '''
+    output:
+    
+    '''

@@ -11,5 +11,6 @@ class DataError(Exception):
 
 error_dict = {
     10000: '数据重复',
-    'WORD_NOT_FOUND': '单词不存在'
+    'WORD_NOT_FOUND': '单词不存在',
+    'INTERPRETATION_FAULT': '单词解释部分缺失'
 }

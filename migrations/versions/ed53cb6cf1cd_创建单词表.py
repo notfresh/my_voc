@@ -35,7 +35,7 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('word_id', sa.Integer(), nullable=True),
-    sa.Column('type', sa.String(length=16), nullable=True),
+    sa.Column('type', sa.String(length=64), nullable=True),
     sa.Column('interpretation', sa.String(length=1024), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
