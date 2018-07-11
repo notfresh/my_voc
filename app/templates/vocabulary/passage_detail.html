@@ -4,6 +4,83 @@
 {% block page_content %}
     <h1>{{ passage.title }}</h1>
     <br>
-    <div>{{ passage.passage }}</div>
+    <p id="selected">selected words:&nbsp;<span class="strong" id="selectedWords"></span></p>
+    <hr>
+    <div id="box">{{ passage.passage }}</div>
+
 {% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+    <script>
+
+        // 增加一个去空格的方法
+        if (typeof(String.prototype.trim) === "undefined") {
+            String.prototype.trim = function () {
+                return String(this).replace(/^\s+|\s+$/g, '');
+            };
+        }
+
+        setWordColor = {
+            selectWord: "",
+            selectedWordList: [],
+            selectWordEnd: function (e) { // 获取鼠标选择的文本.
+                //监听鼠标放开的回调函数
+                var word = "";
+                //对选中文字的处理
+                if (document.selection) { // IE
+                    var sel = document.selection.createRange();
+                    word = sel.text;
+                    setWordColor.selectWord = document.selection.createRange();
+                } else if (window.getSelection) { // w3c
+                    word = window.getSelection();
+                    setWordColor.selectWord = window.getSelection().getRangeAt(0);
+                }
+                if (word.toString().trim() != "") {
+                    setWordColor.changeColor();
+                }
+            },
+            changeColor: function () { //使用全局变量的一个好处是, 减少传参. 把参数放到一个公共的地方.
+                //选择颜色之后，对选中文字的变色函数
+                if (!this.selectWord) {
+                    alert("您还没有选择词语，请选择！");
+                } else {
+                    if (document.selection) {
+                        setWordColor.selectWord.execCommand("BackColor", true, setWordColor.selectColor);
+                    } else {
+                        parent = setWordColor.selectWord.startContainer.parentElement
+                        console.log(setWordColor.selectWord.toString())
+                        if (parent.getAttribute('tar') == 'selectedWord') {
+                            parent.style.cssText = ""
+                            wordIndex = setWordColor.selectedWordList.indexOf(setWordColor.selectWord.toString())
+                            setWordColor.selectedWordList.splice(wordIndex, 1)
+                            words_span = document.getElementById('selectedWords')
+                            words_span.innerText = this.selectedWordList.join(', ')
+                        } else {
+                            try {
+                                if (setWordColor.selectedWordList.indexOf(setWordColor.selectWord.toString()) === -1) {
+                                    var span = document.createElement("span");
+                                    span.style.cssText = "background-color:gray";
+                                    span.setAttribute('tar', 'selectedWord')
+                                    setWordColor.selectedWordList.push(setWordColor.selectWord.toString())
+                                    words_span = document.getElementById('selectedWords')
+                                    words_span.innerText = this.selectedWordList.join(', ')
+                                    setWordColor.selectWord.surroundContents(span);
+                                }
+
+                            } catch (ex) {
+                                alert("选择出错，请保证不要跨段落选择文本,不要截断页面特殊格式的词语！");
+                                console.log("error name:" + ex.name + "<br />error message:" + ex.message);
+                            }
+                        }
+                    }
+                    //变色完成，把相关的参数初始化。
+                    setWordColor.selectColor = "#FFF";
+                    setWordColor.selectWord = "";
+                }
+            }
+        }
+
+        $('#box').on('dblclick', setWordColor.selectWordEnd)
+    </script>
+{% endblock %}

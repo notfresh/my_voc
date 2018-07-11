@@ -9,16 +9,17 @@
     <p class="h3"><a href="{{ url_for('voc.add_passage') }}">[add passage]</a></p>
     <hr>
     <div class="post-tabs">
-    {% include 'vocabulary/_passages.html' %} {# 所有的引用都假设当前根目录是 templates文件夹 #}
-</div>
-{% if pagination %}
-<div class="pagination">
-    {{ macros.pagination_widget(pagination, '.passages') }} {# 当前蓝图下的words endpoint #}
-</div>
-{% endif %}
+        {% include 'vocabulary/_passages.html' %} {# 所有的引用都假设当前根目录是 templates文件夹 #}
+    </div>
+    {% if pagination %}
+        <div class="pagination">
+            {{ macros.pagination_widget(pagination, '.passages') }} {# 当前蓝图下的words endpoint #}
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block scripts %}
-{{ super() }}
-{{ pagedown.include_pagedown() }}
+    {{ super() }}
+
+    {{ pagedown.include_pagedown() }}
 {% endblock %}

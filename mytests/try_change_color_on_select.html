@@ -2,9 +2,263 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>$Title$</title>
+    <title>Title</title>
+    <style>
+        #zylChooserColor {
+            width: 200px;
+            border: 2px solid #000;
+            margin: 1px;
+            border-radius: 2px;
+            box-shadow: 1px 1px 1px #aaa;
+            position: absolute;
+            background: #FFF;
+        }
+
+        #zylChooserColor p {
+            padding: 5px 10px;
+            border-bottom: 1px solid grey;
+            margin-bottom: 5px;
+        }
+
+        #zylChooserColor .creatU {
+            list-style-type: none;
+            padding: 5px 10px;
+        }
+
+        #zylChooserColor .creatL {
+            cursor: pointer;
+            display: inline-block;
+            margin: 2px;
+            width: 32px;
+            height: 32px;
+        }
+
+        #zylChooserColor .creatS {
+            position: relative;
+            left: 65px;
+            top: -5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+    </style>
 </head>
 <body>
-$END$
+
+<div class="main">
+    <div id="selsectArea">
+        <p>登鹳雀楼</p>
+        <p>白日依山尽, 黄河入海流</p>
+        <p>欲穷千里目, 更上一层楼</p>
+    </div>
+</div>
+<script>
+
+    var setWordColor = {
+        element: "",   //目标id的对象
+        selectColor: "#FFF",  //选择的颜色保存
+        selectWord: "",      //选择的文字
+        colors: ["blue", "green", "red", "yellow", "grey"],    //可供选择的颜色库
+        begin: function (ele) {      //绑定
+            if (ele) {
+                this.element = this.basic.$(ele);      //绑定元素
+            }
+            if (this.element) {
+                //只有在找到目标id的情况下，才会执行，否则认为绑定出错，不做动作。
+                setWordColor.createDiv.create();               //创建颜色选择弹出框
+                setWordColor.basic.addEvent(this.element, "mousedown", this.bind.selectWordStart);//绑定鼠标按下事件。
+            } else {
+                alert("绑定失败，请检查是否存在 id= " + ele + " 的元素！");
+            }
+        },
+        addColor: function (str) {
+            //添加颜色表
+        },
+        delColor: function (str) {
+            //删除颜色表
+        }
+    };
+    setWordColor.basic = { // 这是一个对象, 单纯的一个容器.
+        $: function (id) {
+            //获取目标id，找不到则返回空
+            return document.getElementById(id) ? document.getElementById(id) : "";
+        },
+        getEvent: function (e) {
+            //获取事件
+            return e || window.event;
+        },
+        getTarget: function (e) { //根据 event对象, 获取被点击的源
+            //获取事件触发的元素对象
+            e = this.getEvent(e)
+            return e.srcElement || e.target;
+        },
+        addEvent: function (obj, eType, fuc) { // 第一个参数是对象类型, 第二个参数是时间名字, 第三个参数是回调函数.
+            //事件绑定函数
+            if (obj.addEventListener) {
+                obj.addEventListener(eType, fuc, false);
+            } else if (obj.attachEvent) {
+                obj.attachEvent("on" + eType, fuc);
+            } else {
+                obj["on" + eType] = fuc;
+            }
+        },
+        removeEvent: function (obj, eType, fuc) {
+            //事件解除绑定函数
+            if (obj.removeEventListener) {
+                obj.removeEventListener(eType, fuc, false);
+            } else if (obj.attachEvent) {
+                obj.detachEvent("on" + eType, fuc);
+            }
+        },
+        stopPropagation: function (e) {
+            //阻止冒泡
+            e = this.getEvent(e);
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            } else {
+                //IE
+                e.cancelBubble = true;
+            }
+        },
+        preventDefault: function (e) {
+            //取消事件
+            e = getEvent(e);
+            if (e.preventDefault) {
+                e.preventDefault();
+            } else {
+                //IE
+                e.returnValue = false;
+            }
+        },
+        getPPosition: function (e) {
+            //返回鼠标位置的坐标
+            e = setWordColor.basic.getEvent(e);
+            var x = e.pageX || (e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft));
+            var y = e.pageY || (e.clientY + (document.documentElement.scrollTop || document.body.scrollTop));
+            return {'x': x, 'y': y};
+        }
+    };
+    setWordColor.createDiv = {
+        create: function () {
+            //创建颜色列表的div
+            if ("" == setWordColor.basic.$("zylChooserColor")) {
+                var creDiv = document.createElement("div");
+                creDiv.id = "zylChooserColor";
+
+                var creatH = document.createElement("p");
+                creatH.appendChild(document.createTextNode("请选择标注颜色"));
+
+                var creatS = document.createElement("span");
+                creatS.appendChild(document.createTextNode("X"));
+                creatS.className = "creatS";
+                setWordColor.basic.addEvent(creatS, "click", this.hideDiv);
+
+                creatH.appendChild(creatS);
+                creDiv.appendChild(creatH);
+
+                var creatU = document.createElement("ul");
+                creatU.className = "creatU";
+
+                var creatL = "";
+                var rgblist = "rgb(255,255,255)";
+                var createLnode = "";
+                var colorList = setWordColor.colors;
+                for (var i = 0, len = colorList.length; i < len; i++) {
+                    creatL = document.createElement("li");
+                    creatL.className = "creatL";
+
+                    rgblist = colorList[i];
+
+                    creatL.style.cssText = "background-color:" + rgblist;
+
+                    createLnode = document.createAttribute("tar");
+                    createLnode.value = rgblist;
+
+                    creatL.setAttributeNode(createLnode);
+
+                    creatU.appendChild(creatL);
+
+                }
+
+                setWordColor.basic.addEvent(creatU, "click", this.liclick);
+                creDiv.appendChild(creatU);
+                var roc = document.body || document.documentElement;
+                roc.appendChild(creDiv);
+                this.hideDiv();           //选择颜色表之后，隐藏。
+            }
+        },
+        liclick: function (e) { // li元素的回调函数. 也就是选择了颜色之后.
+            //颜色表中，颜色的绑定的回调函数
+            e = setWordColor.basic.getEvent(e);
+            var getTarget = setWordColor.basic.getTarget(e);
+            if (getTarget.tagName.toLowerCase() == "li") { //确认是 li后,
+                var getTar = getTarget.getAttribute("tar");
+                setWordColor.selectColor = getTar;//给一个变量赋值
+                setWordColor.createDiv.hideDiv();//隐藏
+                setWordColor.bind.changeColor();//变色
+                setWordColor.basic.stopPropagation(e);//功能达到，停止冒泡
+            }
+        },
+        showDiv: function (e) { // 显示色盘div
+            //显示颜色表
+            var Position = setWordColor.basic.getPPosition(e);
+            var csstext = "top:" + (Position.y - 0 + 10) + "px;left:" + (Position.x - 5) + "px";
+            setWordColor.basic.$("zylChooserColor").style.cssText = csstext;
+        },
+        hideDiv: function () {
+            //隐藏颜色表
+            if ("" != setWordColor.basic.$("zylChooserColor")) {
+                var csstext = "top:0px;left:-1000px;";
+                setWordColor.basic.$("zylChooserColor").style.cssText = csstext; //从屏幕上消失.
+            }
+        }
+    };
+    setWordColor.bind = { //这又是一个对象.
+        selectWordStart: function () {
+            //监听鼠标按下的回调函数
+            setWordColor.basic.addEvent(setWordColor.element, "mouseup", setWordColor.bind.selectWordEnd);
+        },
+        selectWordEnd: function (e) { // 获取鼠标选择的文本.
+            //监听鼠标放开的回调函数
+            var word = "";
+            //对选中文字的处理
+            if (document.selection) { // IE
+                var sel = document.selection.createRange();
+                word = sel.text;
+                setWordColor.selectWord = document.selection.createRange();
+            } else if (window.getSelection) { // w3c
+                word = window.getSelection();
+                setWordColor.selectWord = window.getSelection().getRangeAt(0);
+            }
+            if (word != "") {
+                setWordColor.createDiv.showDiv(e);
+            }
+        },
+        changeColor: function () { //使用全局变量的一个好处是, 减少传参. 把参数放到一个公共的地方.
+            //选择颜色之后，对选中文字的变色函数
+            if (!setWordColor.selectWord) {
+                alert("您还没有选择词语，请选择！");
+            } else {
+                if (document.selection) {
+                    setWordColor.selectWord.execCommand("BackColor", true, setWordColor.selectColor);
+                } else {
+                    var span = document.createElement("span");
+                    span.style.cssText = "background-color:" + setWordColor.selectColor;
+                    try {
+                        setWordColor.selectWord.surroundContents(span);
+                    } catch (ex) {
+                        alert("选择出错，请保证不要跨段落选择文本,不要截断页面特殊格式的词语！");
+                        console.log("error name:" + ex.name + "<br />error message:" + ex.message);
+                    }
+                }
+                //变色完成，把相关的参数初始化。
+                setWordColor.selectColor = "#FFF";
+                setWordColor.selectWord = "";
+            }
+        }
+    };
+    setWordColor.begin("selsectArea")
+
+</script>
 </body>
 </html>
