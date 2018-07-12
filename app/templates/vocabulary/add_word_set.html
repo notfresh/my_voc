@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %} {# 这句话说明了什么? 一个html被当做python脚本来看待. 只不过在jinja模板里, 使用特定的语法 #}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_content %}
+
+    <div class="row">
+    <h1>Add a word</h1>
+        <form method="POST" action="{{ url_for('voc.add_word_set') }}">
+            {{ form.csrf_token }}
+    {#        <div>{{ form.word.label }}: {{ form.word(class="form-control", placeholder="the word") }}</div>#}
+            <div>{{ form.set_title.label }}: {{ form.set_title(class="form-control") }}</div>
+            <div>{{ form.set_desc.label }}: {{ form.set_desc(class="form-control") }}</div>
+            <div>{{ form.set_words.label }}: {{ form.set_words(class="form-control", rows=3, placeholder=format) }}</div>
+            <div>{{ form.submit(class="btn btn-default") }}</div>
+        </form>
+
+    </div>
+{% endblock %}

@@ -391,8 +391,8 @@ db.event.listen(Comment.body, 'set', Comment.on_changed_body)
 
 class CommonModelMixin:
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now)
 
     def __repr__(self):
         dict_attr = self.__dict__
@@ -404,7 +404,8 @@ class Word(CommonModelMixin, db.Model):
     __tablename__ = 'words'
     word = db.Column(db.String(64), index=True, nullable=False)  # 一个单词.
     phonetics = db.Column(db.String(64))  # 发音.
-    note = db.Column(db.String(1024)) # 备注
+    note = db.Column(db.String(1024)) # 备注, 备注是干啥的.
+    set_id = db.Column(db.Integer, index=True) # 相似或者有关联的词
 
     interpretations = db.relationship('WordInterpretation', cascade='all, delete-orphan', backref=db.backref('word'))
 
@@ -423,6 +424,19 @@ class Word(CommonModelMixin, db.Model):
         session.add(word)
         session.flush()
         return word
+
+    @staticmethod
+    def update_word(word_str, word_set_id, session=None):
+        if session is None:
+            session = db.session
+        word_str_strip = word_str.strip() if word_str else ''
+        w = db.session.query(Word).filter(Word.word == word_str_strip).first()
+        if w:
+            w.word_set_id = word_set_id
+            session.add(w)
+            session.flush()
+            return w
+        return None
 
 
 class WordInterpretation(CommonModelMixin, db.Model):
@@ -477,6 +491,7 @@ class Sentence(db.Model, CommonModelMixin):
 class Passage(db.Model, CommonModelMixin):
     __tablename__ = 'passages'
     passage = db.Column(db.Text, nullable=False)
+    passage_html = db.Column(db.Text)
     passage_short = db.Column(db.String(1024))
     title = db.Column(db.String(128))
 
@@ -489,6 +504,18 @@ class Passage(db.Model, CommonModelMixin):
         db.session.add(obj)
         db.session.flush()
         return obj
+
+    @staticmethod
+    def on_changed_passage(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p']
+        target.passage_html = bleach.linkify(bleach.clean(
+            markdown(value, output_format='html'),
+            tags=allowed_tags, strip=True))
+
+
+db.event.listen(Passage.passage, 'set', Passage.on_changed_passage)
 
 
 class WordsInSentence(db.Model, CommonModelMixin):
@@ -504,15 +531,55 @@ class MyWord(CommonModelMixin, db.Model):
     set_id = db.Column(db.Integer, index=True)
 
     @classmethod
-    def create(cls, word_str):
+    def create(cls, word_str, user_id=None):
         obj = cls()
         obj.word = word_str
+        obj.user_id = user_id
         db.session.add(obj)
         db.session.flush()
         return obj
 
 
-
 class WordSet(CommonModelMixin, db.Model):
     __tablename__ = 'word_set'
+    set_title = db.Column(db.String(128), nullable=False)
     set_desc = db.Column(db.String(1024))
+
+    @classmethod
+    def create(cls, set_title, set_desc):
+        obj = cls()
+        obj.set_desc = set_desc
+        obj.set_title = set_title
+        db.session.add(obj)
+        db.session.flush()
+        return obj
+
+
+class WordSetSub(CommonModelMixin, db.Model):
+    __tablename__ = 'word_set_sub'
+    word_id = db.Column(db.Integer, index=True)  # 一个单词的id.
+    set_id = db.Column(db.Integer, index=True)  # 一个set的id.
+
+    @classmethod
+    def create(cls, word_id, set_id):
+        obj = cls()
+        obj.word_id = word_id
+        obj.set_id = set_id
+        db.session.add(obj)
+        db.session.flush()
+        return obj
+
+
+class MyUfWord(CommonModelMixin, db.Model): # 陌生词, unfamiliar word
+    __tablename__ = 'myufwords'  # 我的单词库
+    word = db.Column(db.String(64), index=True, nullable=False)  # 一个单词.
+    user_id = db.Column(db.Integer) # 谁的单词
+
+    @classmethod
+    def create(cls, word_str, user_id=None):
+        obj = cls()
+        obj.word = word_str
+        obj.user_id = user_id
+        db.session.add(obj)
+        db.session.flush()
+        return obj

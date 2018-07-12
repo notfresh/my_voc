@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Add a word{% endblock %}
+
+{% block page_content %}
+    <h1>Delete unfamiliar words</h1>
+    <form method="POST" action="{{ url_for('voc.delete_myufwords') }}">
+        {{ form.csrf_token }}
+        <div>{{ form.interpretation.label }}: {{ form.interpretation(class="form-control", rows=10, placeholder=format) }}</div>
+        <div>{{ form.submit(class="btn btn-default") }}</div>
+    </form>
+{% endblock %}

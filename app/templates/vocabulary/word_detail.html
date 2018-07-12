@@ -34,7 +34,7 @@
     <ul>
        {% for item in word.interpretations%}
         <li>
-            <p class="h5" >{{item.interpretation }} </p>
+            <p class="h5" ><span style="font-style: italic">{{ item.type }} </span>{{item.interpretation }} </p>
             <ol>
                 {% for subitem in item.examples %}
                 <li> {{ subitem.example }} </li>
@@ -50,6 +50,7 @@
     <br>
     <br>
     <hr>
+    <p style="text-align: left"><a href="{{ url_for('voc.add_word') }}">Continue to add word</a></p>
     <p style="text-align: right"><a href="{{ url_for('voc.delete_word', word=word.word ) }}">Delete the word</a></p>
 
 {% endblock %}

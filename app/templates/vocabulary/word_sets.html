@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %} {# 这句话说明了什么? 一个html被当做python脚本来看待. 只不过在jinja模板里, 使用特定的语法 #}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_content %}
+    <h1>Word set list</h1>
+    <p style="text-align: right"><a href="{{ url_for('voc.add_word_set') }}">[add word set]</a></p>
+    <div class="post-tabs">
+        <ul class="posts">
+            {% for set in word_sets %}
+            <li class="post">
+                <div class="post-content">
+                    <div class="post-body">
+                        <p>
+                            <span class="h4"><a href="{{ url_for('voc.word_set_detail', id=set.id) }}">{{ set.set_title }}</a></span>
+                            <br>
+                            {% for word in set.words  %}
+                                <span >{{ word.word}}</span>
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+
+    </div>
+
+    {% if pagination %}
+        <div class="pagination">
+            {{ macros.pagination_widget(pagination, '.words') }} {# 当前蓝图下的words endpoint #}
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    {{ pagedown.include_pagedown() }}
+{% endblock %}

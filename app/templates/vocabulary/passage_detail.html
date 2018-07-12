@@ -4,9 +4,34 @@
 {% block page_content %}
     <h1>{{ passage.title }}</h1>
     <br>
-    <p id="selected">selected words:&nbsp;<span class="strong" id="selectedWords"></span></p>
+    <div class="row">
+        <div class="col-md-9">
+            <p id="selected">selected words:&nbsp;<span class="strong" id="selectedWords"></span></p>
+        </div>
+        <div class="col-md-3">
+            <button id="ufwordsSubmit2" class="btn btn-default">save the unfamiliar words</button>
+        </div>
+    </div>
+
+
     <hr>
-    <div id="box">{{ passage.passage }}</div>
+    <div id="box">
+        {% if passage.passage_html %}
+            {{ passage.passage_html | safe }}
+        {% else %}
+            {{ passage.passage }}
+        {% endif %}
+    </div>
+    <div id="hiddenForm" hidden>
+        <form method="POST" action="{{ url_for('voc.add_myufword') }}">
+            {{ form.csrf_token }}
+            {#        <div>{{ form.word.label }}: {{ form.word(class="form-control", placeholder="the word") }}</div>#}
+
+            <div><strong>unfamiliar words: </strong>
+                {{ form.interpretation(class="form-control", rows=10, placeholder=forma, id="ufwordsSelected") }}</div>
+            <div>{{ form.submit(class="btn btn-default", id="ufwordsSubmit") }}</div>
+        </form>
+    </div>
 
 {% endblock %}
 
@@ -24,6 +49,13 @@
         setWordColor = {
             selectWord: "",
             selectedWordList: [],
+            updateSelected: function () {
+                selectedWordsStr = this.selectedWordList.join(', ');
+                words_span = document.getElementById('selectedWords');
+                words_span.innerText = selectedWordsStr;
+                ufwordsSelected = document.getElementById('ufwordsSelected')
+                ufwordsSelected.value = selectedWordsStr;
+            },
             selectWordEnd: function (e) { // 获取鼠标选择的文本.
                 //监听鼠标放开的回调函数
                 var word = "";
@@ -50,24 +82,27 @@
                     } else {
                         parent = setWordColor.selectWord.startContainer.parentElement
                         console.log(setWordColor.selectWord.toString())
-                        if (parent.getAttribute('tar') == 'selectedWord') {
+                        if (parent.tagName == 'SPAN' && parent.getAttribute('tar') == 'selectedWord') {
                             parent.style.cssText = ""
-                            wordIndex = setWordColor.selectedWordList.indexOf(setWordColor.selectWord.toString())
-                            setWordColor.selectedWordList.splice(wordIndex, 1)
-                            words_span = document.getElementById('selectedWords')
-                            words_span.innerText = this.selectedWordList.join(', ')
+                            parent.setAttribute('tar', '')
+                            wordIndex = this.selectedWordList.indexOf(this.selectWord.toString())
+                            this.selectedWordList.splice(wordIndex, 1);
+                            this.updateSelected();
+                        } else if (parent.tagName == 'SPAN' && parent.getAttribute('tar') == '') {
+                            parent.style.cssText = "background-color:gray"
+                            parent.setAttribute('tar', 'selectedWord')
+                            this.selectedWordList.push(this.selectWord.toString())
+                            this.updateSelected();
                         } else {
                             try {
-                                if (setWordColor.selectedWordList.indexOf(setWordColor.selectWord.toString()) === -1) {
+                                if (this.selectedWordList.indexOf(this.selectWord.toString()) === -1) {
                                     var span = document.createElement("span");
                                     span.style.cssText = "background-color:gray";
                                     span.setAttribute('tar', 'selectedWord')
-                                    setWordColor.selectedWordList.push(setWordColor.selectWord.toString())
-                                    words_span = document.getElementById('selectedWords')
-                                    words_span.innerText = this.selectedWordList.join(', ')
-                                    setWordColor.selectWord.surroundContents(span);
+                                    this.selectedWordList.push(this.selectWord.toString())
+                                    this.selectWord.surroundContents(span);
+                                    this.updateSelected();
                                 }
-
                             } catch (ex) {
                                 alert("选择出错，请保证不要跨段落选择文本,不要截断页面特殊格式的词语！");
                                 console.log("error name:" + ex.name + "<br />error message:" + ex.message);
@@ -81,6 +116,27 @@
             }
         }
 
+        function postSelectedWords() {
+            url = '/voc/add_myufword_api';
+            post_data = {
+                selectedWordsStr: setWordColor.selectedWordList.join(', ')
+            }
+            $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: JSON.stringify(post_data),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        alert('成功')
+                        console.log(data)
+                    },
+
+                }
+            )
+        }
+
         $('#box').on('dblclick', setWordColor.selectWordEnd)
+        $('#ufwordsSubmit2').on('click', postSelectedWords)
     </script>
 {% endblock %}

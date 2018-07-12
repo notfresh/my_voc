@@ -1,14 +1,15 @@
 import time
 
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask_login import current_user
 
 from app import db
 from app.exceptions import DataError, error_dict
-from app.models import Word, WordInterpretation, WordIPEAP, MyWord, Passage
+from app.models import Word, WordInterpretation, WordIPEAP, MyWord, Passage, MyUfWord, WordSet, WordSetSub
 from app.util import parse_word, word_to_str
 from celery_tasks.tasks import crawl
 
-from .form import CreateWordForm, UpdateWordForm, PassageForm
+from .form import CreateWordForm, UpdateWordForm, PassageForm, WordSetCreateForm, WordSetUpdateForm
 from . import voc
 
 
@@ -130,7 +131,7 @@ def add_myword():
         interpretation = create_word_form.interpretation.data
         list_words = [item.strip() for item in interpretation.strip().split(',')]
         for item in list_words:
-            MyWord.create(item)
+            MyWord.create(item, user_id=current_user.id)
         return redirect(url_for('.mywords'))
     return render_template('vocabulary/add_myword.html', form=create_word_form, format=format)
 
@@ -158,11 +159,110 @@ def add_passage():
 @voc.route('/passage_detail/<int:passage_id>', methods=['GET'])
 def passage_detail(passage_id):
     passage_obj = db.session.query(Passage).filter(Passage.id == passage_id).first()
+    create_word_form = CreateWordForm()
     if not passage_obj:
         flash('passage {} not exits'.format(passage_id))
         from_url = request.args.get('from')
         return redirect(from_url if from_url else url_for('main.index'))  # go back.
-    return render_template('vocabulary/passage_detail.html', passage=passage_obj, title='Passage detail')
+    return render_template('vocabulary/passage_detail.html', passage=passage_obj, form=create_word_form,
+                           title='Passage detail')
+
+
+@voc.route('/myufwords', methods=['GET'])
+def myufwords():
+    page = request.args.get('page', 1, type=int)
+    query = MyUfWord.query
+    pagination = query.order_by(MyUfWord.created_at.desc()).paginate(page, per_page=200, error_out=False)
+    words = pagination.items
+    # 输出格式应该是 : { items: [ ], pages: [] }
+    return render_template('vocabulary/myufwords.html', pagination=pagination, words=words, title='My unfamiliar words')
+
+
+@voc.route('/add_myufword', methods=['GET', 'POST'])
+def add_myufword():
+    format = '''  newsstands, glamourous, pear, pineapple  '''
+    create_word_form = CreateWordForm()
+    if create_word_form.validate_on_submit():
+        interpretation = create_word_form.interpretation.data
+        list_words = [item.strip() for item in interpretation.strip().split(',')]
+        for item in list_words:
+            MyUfWord.create(item, user_id=current_user.id)
+        return redirect(url_for('.myufwords'))
+    return render_template('vocabulary/add_myword.html', form=create_word_form, format=format)
+
+
+@voc.route('/add_myufword_api', methods=['POST'])
+def add_myufword_api():
+    data = request.get_json()
+    words_str = request.get_json().get('selectedWordsStr')
+    list_words = [item.strip() for item in words_str.strip().split(',')]
+    for item in list_words:
+        item_exist = db.session.query(MyUfWord).filter(MyUfWord.word == item).first()
+        if not item_exist:
+            MyUfWord.create(item, user_id=current_user.id)
+    return jsonify({'status': 'OK'})
+
+
+@voc.route('/delete_myufwords', methods=['GET', 'POST'])
+def delete_myufwords():
+    format = '''  newsstands, glamourous, pear, pineapple , to be deleted!! '''
+    create_word_form = CreateWordForm()
+    if create_word_form.validate_on_submit():
+        interpretation = create_word_form.interpretation.data
+        list_words = [item.strip() for item in interpretation.strip().split(',')]
+        for item in list_words:
+            MyUfWord.query.filter(MyUfWord.word == item).delete()
+        return redirect(url_for('.myufwords'))
+    return render_template('vocabulary/delete_myufwords.html', form=create_word_form, format=format)
+
+
+@voc.route('/word_sets', methods=['GET', 'POST'])
+def word_sets():
+    page = request.args.get('page', 1)
+    per_page = 10
+    title = 'Word set'
+    pagination = db.session.query(WordSet).paginate(page=page, per_page=per_page, error_out=False)
+    word_sets = pagination.items
+    for item in word_sets:
+        words = db.session.query(Word.word).join(WordSetSub, Word.id == WordSetSub.word_id)\
+            .filter(WordSetSub.set_id == item.id).order_by(WordSetSub.created_at.asc()).limit(5).all()
+        item.words = words
+    return render_template('vocabulary/word_sets.html', title=title, pagination=pagination,  word_sets=word_sets)
+
+
+@voc.route('/add_word_set', methods=['POST', 'GET'])
+def add_word_set():
+    format = '''  newsstands, news, newspaper'''
+    title = 'Add word set'
+    form = WordSetCreateForm()
+    if form.validate_on_submit():
+        set_title = form.set_title.data
+        set_desc = form.set_desc.data
+        set_words = form.set_words.data
+        word_set_obj = WordSet.create(set_title, set_desc)
+        list_words = [item.strip() for item in set_words.strip().split(',')]
+        for item in list_words:
+            word_obj = db.session.query(Word.word, Word.id).filter(Word.word == item).first()
+            if not word_obj:
+                flash('{} not exits'.format(item))
+                return redirect(url_for('.word_sets'))
+            WordSetSub.create(word_obj.id, word_set_obj.id)
+        return redirect(url_for('.word_sets'))
+    return render_template('vocabulary/add_word_set.html', form=form, title=title, format=format)
+
+
+@voc.route('/word_set_detail/<int:id>', methods=['POST', 'GET'])
+def word_set_detail(id):
+    title = 'Update word set'
+    form = WordSetUpdateForm()
+    word_set_obj = db.session.query(WordSet).filter(WordSet.id == id).first()
+    if request.method == 'GET':
+        words = db.session.query(Word.word).join(WordSetSub, Word.id == WordSetSub.word_id) \
+            .filter(WordSetSub.set_id == word_set_obj.id).all()
+        form.set_words.data = ','.join([ item[0] for item in words])
+        form.set_title.data = word_set_obj.set_title
+        form.set_desc.data = word_set_obj.set_desc
+        return render_template('vocabulary/word_set_detail.html', form=form, title=title)
 
 
 
