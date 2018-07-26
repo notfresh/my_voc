@@ -5,8 +5,11 @@ from sqlalchemy.orm import sessionmaker, relationship, backref
 from sqlalchemy import create_engine, Integer, Column, DateTime, String, ForeignKey, Text
 from sqlalchemy.ext.declarative import declarative_base
 
+from config import env_config
+
 Base = declarative_base()
-engine = create_engine('mysql+pymysql://root:Dev@123@localhost:3306/my_vocabulary?charset=utf8', echo=True)
+db_url = env_config.get('DEV_DATABASE_URL')
+engine = create_engine(db_url, echo=True)
 
 Session = sessionmaker(bind=engine)
 
