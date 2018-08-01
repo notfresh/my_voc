@@ -2,9 +2,17 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block page_content %}
-    <h1>{{ passage.title }}</h1>
+<div class="row align-items-center">
+    <div class="col-md-9"><h1>{{ passage.title }}</h1></div>
+    <div class="col-md-3">
+        <p>
+            <button id="ufwordsChoose" class="btn btn-default">Choose the unfamiliar words</button>
+        </p>
+    </div>
+</div>
+
     <br>
-    <div class="row">
+    <div class="row align-items-center" id="chooseUf" hidden>
         <div class="col-md-9">
             <p id="selected">selected words:&nbsp;<span class="strong" id="selectedWords"></span></p>
         </div>
@@ -15,24 +23,50 @@
 
 
     <hr>
-    <div id="box">
+    <div id="box" style="font-size:120%">
         {% if passage.passage_html %}
             {{ passage.passage_html | safe }}
         {% else %}
             {{ passage.passage }}
         {% endif %}
     </div>
-    <div id="hiddenForm" hidden>
-        <form method="POST" action="{{ url_for('voc.add_myufword') }}">
-            {{ form.csrf_token }}
-            {#        <div>{{ form.word.label }}: {{ form.word(class="form-control", placeholder="the word") }}</div>#}
 
-            <div><strong>unfamiliar words: </strong>
-                {{ form.interpretation(class="form-control", rows=10, placeholder=forma, id="ufwordsSelected") }}</div>
-            <div>{{ form.submit(class="btn btn-default", id="ufwordsSubmit") }}</div>
-        </form>
+<div class="row">
+    <br><br><br>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-9">
+                <p class="h3"> Word frequency statistics
+                    <span class="small" > <span id="unfamiliarWordsCount">{{ word_dict_list| length }}</span> Words are unfamiliar</span>
+                </p>
+            </div>
+            <div class="col-md-3">
+                <button id="saveFamiliarWords" class="btn btn-default">save the familiar words</button>
+            </div>
+        </div>
+
+        <hr>
+        <div id="familiarWords">
+
+
+            {% for k,v in word_dict_list %}
+            <div class="col-md-4 col-sm-12">
+            <p >
+                <a href="{{ url_for('.word_detail', word=k, from=url_for(request.endpoint, passage_id=passage.id), create=1) }}"><span>{{ k }}</span></a> :
+                <span>{{ v }}</span>
+                &nbsp; &nbsp; &nbsp; <input type="checkbox" name="word"  w="{{ k }}" id="{{ 'word_'+ k }}" value=""> <label
+                    style="font-weight:normal"
+                    for="{{ 'word_'+ k }}">familiar</label>
+                <br>
+            </p>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
+</div>
+<br><br><br><br><br><br><br><br><br><br>
+<p style="text-align: right"><a href="{{ url_for('voc.delete_passage', passage_id=passage.id ) }}">Delete the passage</a></p>
 {% endblock %}
 
 {% block scripts %}
@@ -135,8 +169,58 @@
                 }
             )
         }
+        $('#chooseUf').hide();
+        function chooseUnfamiliarWord(){
+            if  ($('#chooseUf').is(':hidden')){
+                $('#chooseUf').show();
+                $('#box').on('dblclick', setWordColor.selectWordEnd);
+            }else{
+                $('#chooseUf').hide();
+                $('#box').off('dblclick', setWordColor.selectWordEnd);
+            }
 
-        $('#box').on('dblclick', setWordColor.selectWordEnd)
+        }
+        $('#ufwordsChoose').on('click', chooseUnfamiliarWord)
+
+
         $('#ufwordsSubmit2').on('click', postSelectedWords)
+
+        function postFamiliarWords(){
+            familiarWordsDiv = $('div#familiarWords')
+            familiarWords = familiarWordsDiv.find('[name=word]').filter(function(){
+                return $(this).is(':checked')
+            })
+            words = []
+            familiarWords.each(function(index, element){
+                words.push($(element).attr('w'))
+            })
+            url = '/voc/add_my_familiar_word_api';
+            post_data = {
+                words: words
+            }
+            $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: JSON.stringify(post_data),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        // delete the selected
+                        familiarWordsP = familiarWordsDiv.find('div').filter(function(){
+                            return $(this).find(':checkbox').is(':checked')
+                        });
+                        familiarWordsP.remove()
+                        // update the count
+                        unfamiliarWordsP = familiarWordsDiv.find('div').filter(function(){
+                            return !$(this).find(':checkbox').is(':checked')
+                        });
+                        $('#unfamiliarWordsCount').text(unfamiliarWordsP.length);
+                    },
+
+                }
+            )
+        }
+        $('#saveFamiliarWords').on('click', postFamiliarWords)
     </script>
 {% endblock %}

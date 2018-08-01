@@ -7,6 +7,7 @@ from app import db
 from app.exceptions import DataError, error_dict
 from app.models import Word, WordInterpretation, WordIPEAP, MyWord, Passage, MyUfWord, WordSet, WordSetSub
 from app.util import parse_word, word_to_str
+from app.util.parse_passage import *
 from celery_tasks.tasks import crawl
 
 from .form import CreateWordForm, UpdateWordForm, PassageForm, WordSetCreateForm, WordSetUpdateForm
@@ -29,6 +30,11 @@ def word_detail(word):
     if not word_obj:
         flash('{} not exits!'.format(word))
         from_url = request.args.get('from')
+        create_flag = request.args.get('create')
+        if create_flag:
+            word_obj = Word.create_word(word)
+            crawl.delay(word, 2)  # 爬单词, 调用celery并不能省略参数，或者使用默认参数。
+            flash('creating and crawling word in the background')
         return redirect(from_url if from_url else url_for('main.index'))  # go back.
     return render_template('vocabulary/word_detail.html', word=word_obj)
 
@@ -108,7 +114,7 @@ def delete_word(word):
 
 @voc.route('/craw_word/<string:word>', methods=['GET', 'POST'])
 def craw_word(word):
-    crawl.delay(word, 2)  # 调用爬虫从有道翻译网站上爬取柯林斯词典.
+    crawl.delay(word, 2)  # 调用爬虫从有道翻译网站上爬取柯林斯词典. 2 是固定用法， 就这写就完了。
     time.sleep(2)
     return redirect(url_for('.word_detail', word=word))
 
@@ -164,8 +170,26 @@ def passage_detail(passage_id):
         flash('passage {} not exits'.format(passage_id))
         from_url = request.args.get('from')
         return redirect(from_url if from_url else url_for('main.index'))  # go back.
+    word_lists = passage_to_word_list(passage_obj.passage)
+    word_lists = filter_word_list(word_lists)
+    word_dict = statistic(word_lists)
+    list_my_words_query = db.session.query(MyWord.word).all()
+    list_my_words = [item[0] for item in list_my_words_query]
+    word_dict = filter_my_words(word_dict, list_my_words)
+    word_dict_list = sorted(word_dict.items(), key=lambda item: item[1], reverse=True)
     return render_template('vocabulary/passage_detail.html', passage=passage_obj, form=create_word_form,
-                           title='Passage detail')
+                           title='Passage detail', word_dict_list=word_dict_list)
+
+
+@voc.route('/delete_passage/<int:passage_id>', methods=['GET', 'POST'])
+def delete_passage(passage_id):
+    p = Passage.query.filter(Passage.id == passage_id).first()
+    if p:
+        db.session.delete(p)
+        flash('[{}] has been deleted.'.format(p.title))
+    else:
+        flash('[{}] not exits.'.format(p.title))
+    return redirect(url_for('.passages'))
 
 
 @voc.route('/myufwords', methods=['GET'])
@@ -200,6 +224,17 @@ def add_myufword_api():
         item_exist = db.session.query(MyUfWord).filter(MyUfWord.word == item).first()
         if not item_exist:
             MyUfWord.create(item, user_id=current_user.id)
+    return jsonify({'status': 'OK'})
+
+
+@voc.route('/add_my_familiar_word_api', methods=['POST'])
+def add_my_familiar_word_api():
+    words = request.get_json().get('words')
+    list_words = [item.strip() for item in words]
+    for item in list_words:
+        item_exist = db.session.query(MyWord).filter(MyWord.word == item).first()
+        if not item_exist:
+            MyWord.create(item, user_id=current_user.id)
     return jsonify({'status': 'OK'})
 
 

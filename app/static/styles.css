@@ -35,7 +35,7 @@ div.post-thumbnail {
     position: absolute;
 }
 div.post-content {
-    margin-left: 48px;
+    /* margin-left: 48px; */
     min-height: 48px;
 }
 div.post-footer {
@@ -104,4 +104,8 @@ div.flask-pagedown-preview h3 {
 }
 .table.followers tr {
     border-bottom: 1px solid #e0e0e0;
+}
+
+.small {
+    font-size: 80%;
 }
