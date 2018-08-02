@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 
 def passage_to_word_list(str_passage):
-    list1 = re.split(r'\s+', str_passage, flags=re.MULTILINE)
+    list1 = re.split(r'[\s+|/|:]', str_passage, flags=re.MULTILINE)
     # list1 = str_passage.split(' ')
     return list1
 
@@ -15,8 +15,16 @@ def strip_ext(str1, substr1):
         return str1
 
 
+def digit_in_str(str1):
+    regex = r'[1234567890]'
+    if re.search(regex, str1):
+        return True
+    else:
+        return False
+
+
 def filter_word_list(list_words):
-    list_words = [item for item in list_words if item and len(item)>=3]
+    list_words = [item for item in list_words if item and len(item)>=3 and not digit_in_str(item)]
     # 过滤2， 把末尾的标点符号去掉， 比如逗号
     # TODO: 这些过滤应该整合起来,
     # TODO： 这些过滤只应该发生在头或者尾

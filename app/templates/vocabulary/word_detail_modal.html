@@ -2,7 +2,6 @@
     <h1>{{ word.word }}<small >&nbsp;&nbsp;{{ word.phonetics }}</small><br></h1>
     <p><a href="http://dict.youdao.com/w/eng/{{word.word}}/" target="_blank">查看有道词典</a></p>
     <p><a href="{{ url_for('voc.update_word', word=word.word)}}">编辑</a></p>
-    <p style=""><a href="{{ url_for('voc.craw_word', word=word.word) }}">Crawl word</a>[ your own interpretation would be lost ]</p>
     <ul>
        {% for item in word.interpretations%}
         <li>
