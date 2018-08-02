@@ -39,6 +39,17 @@ def word_detail(word):
     return render_template('vocabulary/word_detail.html', word=word_obj)
 
 
+@voc.route('/words_modal/<string:word>')
+def word_detail_modal(word):
+    word_obj = Word.query.filter(Word.word == word).first()
+    if not word_obj:
+        create_flag = request.args.get('create')
+        # if create_flag:
+        word_obj = Word.create_word(word)
+        crawl.delay(word, 2)  # 爬单词, 调用celery并不能省略参数，或者使用默认参数。
+    return render_template('vocabulary/word_detail_modal.html', word=word_obj)
+
+
 @voc.route('/add_word', methods=['GET', 'POST'])
 def add_word():
     format = '''example as follow:
@@ -122,7 +133,7 @@ def craw_word(word):
 @voc.route('/mywords', methods=['GET'])
 def mywords():
     page = request.args.get('page', 1, type=int)
-    query = MyWord.query
+    query = MyWord.query.filter(MyWord.user_id == current_user.id)
     pagination = query.order_by(MyWord.created_at.desc()).paginate(page, per_page=200, error_out=False)
     words = pagination.items
     # 输出格式应该是 : { items: [ ], pages: [] }
@@ -173,7 +184,7 @@ def passage_detail(passage_id):
     word_lists = passage_to_word_list(passage_obj.passage)
     word_lists = filter_word_list(word_lists)
     word_dict = statistic(word_lists)
-    list_my_words_query = db.session.query(MyWord.word).all()
+    list_my_words_query = db.session.query(MyWord.word).filter(MyWord.user_id == current_user.id).all()
     list_my_words = [item[0] for item in list_my_words_query]
     word_dict = filter_my_words(word_dict, list_my_words)
     word_dict_list = sorted(word_dict.items(), key=lambda item: item[1], reverse=True)
@@ -232,7 +243,7 @@ def add_my_familiar_word_api():
     words = request.get_json().get('words')
     list_words = [item.strip() for item in words]
     for item in list_words:
-        item_exist = db.session.query(MyWord).filter(MyWord.word == item).first()
+        item_exist = db.session.query(MyWord).filter(MyWord.word == item, MyWord.user_id == current_user.id).first()
         if not item_exist:
             MyWord.create(item, user_id=current_user.id)
     return jsonify({'status': 'OK'})

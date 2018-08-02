@@ -3,11 +3,11 @@
 {% block title %}My Vocabulary{% endblock %}
 
 {% block head %}
+    <script src="{{ url_for('static', filename='jquery-3.3.1.js') }}"></script>
     {{ super() }}
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="{{ url_for('static', filename='jquery-3.3.1.js') }}"></script>
 {% endblock %}
 
 {% block navbar %}
