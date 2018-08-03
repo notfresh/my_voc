@@ -188,7 +188,7 @@ def passage_detail(passage_id):
     list_my_words_query = db.session.query(MyWord.word).filter(MyWord.user_id == current_user.id).all()
     list_my_words = [item[0] for item in list_my_words_query]
     word_dict = filter_my_words(word_dict, list_my_words)
-    word_dict_list = sorted(word_dict.items(), key=lambda item: item[1], reverse=True)
+    word_dict_list = sorted(word_dict.items(), key=lambda item: (item[1], item[0]), reverse=True)
     return render_template('vocabulary/passage_detail.html', passage=passage_obj,
                            title='Passage detail', word_dict_list=word_dict_list)
 
