@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import current_user
@@ -86,7 +87,8 @@ def update_word(word):
     form = UpdateWordForm()
     if request.method == 'GET':
         w = Word.query.filter(Word.word == word).first()
-        word_str = request.form.get('interpretation') or word_to_str(w)
+        # word_str = request.form.get('interpretation') or word_to_str(w)
+        word_str = word_to_str(w)
         form.interpretation.data = word_str
         return render_template('vocabulary/update_word.html', form=form, word_str=word_str, word=word)
     elif form.validate_on_submit():
@@ -176,7 +178,6 @@ def add_passage():
 @voc.route('/passage_detail/<int:passage_id>', methods=['GET'])
 def passage_detail(passage_id):
     passage_obj = db.session.query(Passage).filter(Passage.id == passage_id).first()
-    create_word_form = CreateWordForm()
     if not passage_obj:
         flash('passage {} not exits'.format(passage_id))
         from_url = request.args.get('from')
@@ -188,8 +189,31 @@ def passage_detail(passage_id):
     list_my_words = [item[0] for item in list_my_words_query]
     word_dict = filter_my_words(word_dict, list_my_words)
     word_dict_list = sorted(word_dict.items(), key=lambda item: item[1], reverse=True)
-    return render_template('vocabulary/passage_detail.html', passage=passage_obj, form=create_word_form,
+    return render_template('vocabulary/passage_detail.html', passage=passage_obj,
                            title='Passage detail', word_dict_list=word_dict_list)
+
+
+@voc.route('/update_passage/<int:passage_id>', methods=['GET', 'POST'])
+def update_passage(passage_id):
+    form = PassageForm()
+    passage_obj = db.session.query(Passage).filter(Passage.id == passage_id).first()
+    if request.method == 'GET':
+        form.title.data = passage_obj.title
+        form.passage.data = passage_obj.passage
+        return render_template('vocabulary/update_passage.html', form=form, passage_id=passage_id, passage= passage_obj)
+    elif form.validate_on_submit():
+        title = form.title.data
+        passage = form.passage.data
+        try:
+            passage_obj.title = title
+            passage_obj.passage = passage
+            passage_obj.updated_at = datetime.now()
+            db.session.add(passage_obj)
+            return redirect(url_for('.passage_detail', passage_id=passage_id))
+        except Exception as e:
+            db.session.rollback()
+            flash(str(e))
+            return redirect(url_for('.passage_detail', passage_id=passage_id))
 
 
 @voc.route('/delete_passage/<int:passage_id>', methods=['GET', 'POST'])
