@@ -57,34 +57,37 @@ class YoudaoDictSpider(Spider):
         word = self.word
         output_item = {'w': word, 'ph': '', 'itp': []}
         trans = response.css('div#authTrans div#collinsResult')
-        word_phonetics = trans.css('em[class="additional spell phonetic"]::text').extract_first()
-        if word_phonetics:
-            output_item['ph'] = word_phonetics
-        trans_list = trans.css('ul.ol>li')
-        for item in trans_list:
-            word_str = item.css('div.collinsMajorTrans p').extract_first()
-            trans_item = {}
-            if not word_str:
-                continue
-            word_str_clean = re.sub('\s{2,}', '', word_str)
-            if '<b>' in word_str_clean:
-                word_str_clean = word_str_clean.replace('<b>', '').replace('</b>', '')
-            word_dict = xmltodict.parse(word_str_clean)
-            span_node = word_dict.get('p').get('span')
-            try:
-                if type(span_node) == list:
-                    word_type = span_node[0]['#text']
-                else:
-                    word_type = span_node['#text']
-            except:
-                word_type = ''
-            trans_item['itp_type'] = word_type
-            trans_item['itp_str'] = word_dict.get('p').get('#text')
-            trans_item['eap'] = []
-            for example_item in item.css('div.examples '):
-                example_sentence = '|'.join(example_item.css('p::text').extract())
-                trans_item['eap'].append(example_sentence)
-            output_item['itp'].append(trans_item)
+        if trans == []:
+            output_item['itp'].append({'itp_type': 'None', 'itp_str': 'collins interpretation not exists in youdao!'})
+        else:
+            word_phonetics = trans.css('em[class="additional spell phonetic"]::text').extract_first()
+            if word_phonetics:
+                output_item['ph'] = word_phonetics
+            trans_list = trans.css('ul.ol>li')
+            for item in trans_list:
+                word_str = item.css('div.collinsMajorTrans p').extract_first()
+                trans_item = {}
+                if not word_str:
+                    continue
+                word_str_clean = re.sub('\s{2,}', '', word_str)
+                if '<b>' in word_str_clean:
+                    word_str_clean = word_str_clean.replace('<b>', '').replace('</b>', '')
+                word_dict = xmltodict.parse(word_str_clean)
+                span_node = word_dict.get('p').get('span')
+                try:
+                    if type(span_node) == list:
+                        word_type = span_node[0]['#text']
+                    else:
+                        word_type = span_node['#text']
+                except:
+                    word_type = ''
+                trans_item['itp_type'] = word_type
+                trans_item['itp_str'] = word_dict.get('p').get('#text')
+                trans_item['eap'] = []
+                for example_item in item.css('div.examples '):
+                    example_sentence = '|'.join(example_item.css('p::text').extract())
+                    trans_item['eap'].append(example_sentence)
+                output_item['itp'].append(trans_item)
         # write_obj_to_file('output.txt', output_item)
         # try:
         self.word_method(output_item)

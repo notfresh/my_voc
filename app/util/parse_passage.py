@@ -69,6 +69,9 @@ def filter_my_words(dict_word, list_my_words):
         elif item.endswith('s'):
             if item.rstrip('s') in list_my_words:
                 dict_word.pop(item)
+        elif item.endswith('es'):
+            if item.rstrip('es') in list_my_words:
+                dict_word.pop(item)
         elif item.endswith('ed'):
             if item.rstrip('ed') in list_my_words:
                 dict_word.pop(item)
