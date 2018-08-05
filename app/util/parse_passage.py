@@ -3,6 +3,8 @@ from collections import OrderedDict
 
 
 def passage_to_word_list(str_passage):
+    str_passage = str_passage.replace('’', '\'')
+    str_passage = str_passage.replace('”', '"')
     list1 = re.split(r'[\s+|/|:]', str_passage, flags=re.MULTILINE)
     # list1 = str_passage.split(' ')
     return list1
@@ -63,6 +65,22 @@ def filter_my_words(dict_word, list_my_words):
             dict_word.pop(item)
         elif item.endswith('s'):
             if item.rstrip('s') in list_my_words:
+                dict_word.pop(item)
+        elif item.endswith('ed'):
+            if item.rstrip('ed') in list_my_words:
+                dict_word.pop(item)
+            elif item.rstrip('d') in list_my_words:
+                dict_word.pop(item)
+        elif item.endswith('ing'):
+            if item.rstrip('ing') in list_my_words:
+                dict_word.pop(item)
+            if item[-4] == item[-5]:
+                if item[:-4] in list_my_words:
+                    dict_word.pop(item)
+            if item[:-3] + 'e' in list_my_words:
+                dict_word.pop(item)
+        elif item.endswith('ly'):
+            if item.rstrip('ly') in list_my_words:
                 dict_word.pop(item)
 
     return dict_word
