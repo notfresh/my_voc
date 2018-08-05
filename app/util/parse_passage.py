@@ -39,6 +39,7 @@ def filter_word_list(list_words):
     list_words = [item.strip('(') for item in list_words]
     list_words = [item.strip(')') for item in list_words]
     list_words = [item.rstrip(';') for item in list_words]
+    list_words = [item.rstrip('?') for item in list_words]
     list_words = [item.rstrip(':') for item in list_words]
     list_words = [item.rstrip('.') for item in list_words]
     list_words = [item.rstrip(',') for item in list_words]

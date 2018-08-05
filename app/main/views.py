@@ -80,7 +80,7 @@ def edit_profile_admin(id):
 @main.route('/')
 @login_required
 def index():
-    return redirect(url_for('voc.words'))
+    return redirect(url_for('voc.passages'))
 
 
 
