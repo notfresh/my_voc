@@ -5,7 +5,8 @@ from collections import OrderedDict
 def passage_to_word_list(str_passage):
     str_passage = str_passage.replace('’', '\'')
     str_passage = str_passage.replace('”', '"')
-    list1 = re.split(r'[\s+|/|:]', str_passage, flags=re.MULTILINE)
+    str_passage = str_passage.replace('，', ',')
+    list1 = re.split(r'[\s+|/|:|,]', str_passage, flags=re.MULTILINE)
     # list1 = str_passage.split(' ')
     return list1
 
