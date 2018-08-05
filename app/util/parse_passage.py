@@ -43,8 +43,8 @@ def filter_word_list(list_words):
     list_words = [item.rstrip(':') for item in list_words]
     list_words = [item.rstrip('.') for item in list_words]
     list_words = [item.rstrip(',') for item in list_words]
-    list_words = [item.rstrip('，') for item in list_words]
     list_words = [item.rstrip('!') for item in list_words]
+    list_words = [item.rstrip('\'') for item in list_words] # 附属的所有格
     list_words = [strip_ext(item, "'s") for item in list_words]
     # list_words = [item.strip(r'<br>') for item in list_words]
     list_words = [item.lower() for item in list_words]
