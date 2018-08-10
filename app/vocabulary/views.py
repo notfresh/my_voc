@@ -160,7 +160,7 @@ def passages():
     page = request.args.get('page', 1, type=int)
     search_title = request.args.get('title')
     query = db.session.query(Passage.id, Passage.title, Passage.passage_short)
-    if search_title:
+    if search_title and search_title != 'NULL':
         query = query.filter(Passage.title.like('%' + search_title + '%'))
     else:
         search_title = 'NULL'

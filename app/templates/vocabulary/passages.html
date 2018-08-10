@@ -21,7 +21,7 @@
     </div>
     {% if pagination %}
         <div class="pagination">
-            {{ macros.pagination_widget(pagination, '.passages') }} {# 当前蓝图下的words endpoint #}
+            {{ macros.pagination_widget(pagination, '.passages', title=search_title) }} {# 当前蓝图下的words endpoint #}
         </div>
     {% endif %}
 {% endblock %}
@@ -39,6 +39,13 @@
             window.location.href = request_url;
         }
         $('#searchButton').on('click',search);
+        $('#searchBox').on('keypress',function(e){
+            if(e.keyCode == 13)
+            {
+                search();
+                return false; // this line is very import, because a input field in a form will cause the form to submit
+            }
+        });
         searchTitle = "{{ search_title | safe }}";
         if (searchTitle != 'NULL'){
             $('#searchBox').val( {{ search_title }});
