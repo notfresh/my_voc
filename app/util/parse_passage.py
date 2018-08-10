@@ -66,6 +66,8 @@ def filter_my_words(dict_word, list_my_words):
     for item in key_list:
         if item in list_my_words:
             dict_word.pop(item)
+        elif item.startswith('a.') or item.startswith('b.') or item.startswith('c.') or item.startswith('d.'):
+            dict_word.pop(item)
         elif item.endswith('s'):
             if item.rstrip('s') in list_my_words:
                 dict_word.pop(item)
