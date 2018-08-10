@@ -5,21 +5,89 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block page_content %}
-    <h1>My words </h1>
-    <hr>
-    <p class="h3"><a href="{{ url_for('voc.add_myword') }}">[add my words]</a></p>
-    <hr>
-    <div class="post-tabs">
-        {% include 'vocabulary/_mywords.html' %} {# 所有的引用都假设当前根目录是 templates文件夹 #}
+<h1>My words </h1>
+<hr>
+<p class="h3"><a href="{{ url_for('voc.add_myword') }}">[add my words]</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a id="deleteWordsButton" href="javascript:void(0);">[delete my words mode]</a>
+    <span id="deleteConfirmButtonSpan" hidden>
+<button id="deleteConfirmButton"  class="btn btn-default">delete</button></span>
+
+</p>
+<hr>
+<div class="post-tabs">
+    <div id="familiarWords">
+        <p>
+            {% for word in words %}
+            <span class="h5">
+                <a data-toggle="modal" data-target="#myModal" onclick="{{ 'view_interpretation(\''  + word.word + '\')' }}"><span>{{ word.word }}</span></a>
+                <span class="deleteCheckbox" hidden>
+                <input type="checkbox" name="word" w="{{ word.word }}" id="{{ word.word}}" value="">
+                <label style="font-weight:normal" for="{{ word.word }}">delete</label>
+                    </span>
+            </span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+            {% endfor %}
+        </p>
     </div>
-    {% if pagination %}
-        <div class="pagination">
-            {{ macros.pagination_widget(pagination, '.mywords') }} {# 当前蓝图下的words endpoint #}
-        </div>
-    {% endif %}
+</div>
+{% include('vocabulary/word_interpretation_modal.html') %}
+{% if pagination %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.mywords') }} {# 当前蓝图下的words endpoint #}
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
-    {{ super() }}
-    {{ pagedown.include_pagedown() }}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+<script>
+    function showDeleteCheckbox(){
+        deleteBoxes = $('span.deleteCheckbox');
+        if (deleteBoxes.is(':hidden')){
+            $('span.deleteCheckbox').show();
+            $('#deleteConfirmButtonSpan').show()
+        }else{
+            $('span.deleteCheckbox').hide();
+            $('#deleteConfirmButtonSpan').hide()
+        }
+
+    }
+    $('#deleteWordsButton').on('click', showDeleteCheckbox);
+
+
+    function deleteFamiliarWords(){
+        familiarWordsDiv = $('div#familiarWords')
+        familiarWords = familiarWordsDiv.find('[name=word]').filter(function(){
+            return $(this).is(':checked')
+        })
+        words = []
+        familiarWords.each(function(index, element){
+            words.push($(element).attr('w'))
+        })
+        url = '/voc/delete_my_familiar_word_api';
+        post_data = {
+            words: words
+        }
+        $.ajax({
+                url: url,
+                type: 'POST',
+                data: JSON.stringify(post_data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                    // delete the selected
+                    familiarWordsP = familiarWordsDiv.find('span').filter(function(){
+                        return $(this).find(':checkbox').is(':checked')
+                    });
+                    familiarWordsP.remove();
+                },
+
+            }
+         )
+     }
+    $('#deleteConfirmButton').on('click', deleteFamiliarWords)
+</script>
 {% endblock %}

@@ -136,7 +136,7 @@ def craw_word(word):
 def mywords():
     page = request.args.get('page', 1, type=int)
     query = MyWord.query.filter(MyWord.user_id == current_user.id)
-    pagination = query.order_by(MyWord.created_at.desc()).paginate(page, per_page=200, error_out=False)
+    pagination = query.order_by(MyWord.created_at.desc(), MyWord.word.asc()).paginate(page, per_page=200, error_out=False)
     words = pagination.items
     # 输出格式应该是 : { items: [ ], pages: [] }
     return render_template('vocabulary/mywords.html', pagination=pagination, words=words, title='My words')
@@ -158,10 +158,19 @@ def add_myword():
 @voc.route('/passages', methods=['GET'])
 def passages():
     page = request.args.get('page', 1, type=int)
+    search_title = request.args.get('title')
     query = db.session.query(Passage.id, Passage.title, Passage.passage_short)
-    pagination = query.order_by(Passage.created_at.desc()).paginate(page, per_page=5, error_out=False)
+    if search_title:
+        query = query.filter(Passage.title.like('%' + search_title + '%'))
+    else:
+        search_title = 'NULL'
+    pagination = query.order_by(Passage.created_at.desc()).paginate(page, per_page=10, error_out=False)
     passages_list = pagination.items
-    return render_template('vocabulary/passages.html', pagination=pagination, passages=passages_list, title='Passages')
+    return render_template('vocabulary/passages.html',
+                           pagination=pagination,
+                           passages=passages_list,
+                           title='Passages',
+                           search_title=search_title)
 
 
 @voc.route('/add_passage', methods=['GET', 'POST'])
@@ -270,6 +279,18 @@ def add_my_familiar_word_api():
         item_exist = db.session.query(MyWord).filter(MyWord.word == item, MyWord.user_id == current_user.id).first()
         if not item_exist:
             MyWord.create(item, user_id=current_user.id)
+    return jsonify({'status': 'OK'})
+
+
+@voc.route('/delete_my_familiar_word_api', methods=['POST'])
+def delete_my_familiar_word_api():
+    words = request.get_json().get('words')
+    list_words = [item.strip() for item in words]
+    for item in list_words:
+        item_exist = db.session.query(MyWord).filter(MyWord.word == item, MyWord.user_id == current_user.id).first()
+        if item_exist:
+            db.session.delete(item_exist)
+    db.session.commit()
     return jsonify({'status': 'OK'})
 
 

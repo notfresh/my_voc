@@ -6,9 +6,17 @@
 {% block page_content %}
     <h1>Passages </h1>
     <hr>
-    <p class="h3"><a href="{{ url_for('voc.add_passage') }}">[add passage]</a></p>
-    <hr>
+    <p class="h4"><a href="{{ url_for('voc.add_passage') }}">[add passage]</a></p>
+
     <div class="post-tabs">
+        <form action="">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="passage title" id="searchBox" aria-describedby="searchButton">
+            <span class="input-group-addon" ><a id="searchButton"  href="javascript:void(0);">Search</a></span>
+        </div>
+        </form>
+        <br>
+    </div>
         {% include 'vocabulary/_passages.html' %} {# 所有的引用都假设当前根目录是 templates文件夹 #}
     </div>
     {% if pagination %}
@@ -20,6 +28,22 @@
 
 {% block scripts %}
     {{ super() }}
-
     {{ pagedown.include_pagedown() }}
+    <script>
+        function search(){
+            searchTitle = $('#searchBox').val();
+            request_url = '/voc/passages'
+            if (searchTitle){
+                request_url = request_url + '?title=' + searchTitle
+            }
+            window.location.href = request_url;
+        }
+        $('#searchButton').on('click',search);
+        searchTitle = "{{ search_title | safe }}";
+        if (searchTitle != 'NULL'){
+            $('#searchBox').val( {{ search_title }});
+        }
+
+
+    </script>
 {% endblock %}

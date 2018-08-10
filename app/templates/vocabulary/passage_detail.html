@@ -48,24 +48,18 @@
 
         <hr>
         <div id="familiarWords">
-            <script>
-             function view_interpretation(word){
-                view_interpretation_call(word);
-             }
-
-            </script>
-
             {% for k,v in word_dict_list %}
             <div class="col-md-4 col-sm-12">
-            <p >
-                <!--<a href="{{ url_for('.word_detail', word=k, from=url_for(request.endpoint, passage_id=passage.id), create=1) }}"><span>{{ k }}</span></a> :-->
-                <a  data-toggle="modal"  data-target="#myModal" onclick="{{ 'view_interpretation(\''  + k + '\')' }}"><span>{{ k }}</span></a> :
-                <span>{{ v }}</span>
-                &nbsp; &nbsp; &nbsp; <input type="checkbox" name="word"  w="{{ k }}" id="{{ 'word_'+ k }}" value=""> <label
-                    style="font-weight:normal"
-                    for="{{ 'word_'+ k }}">familiar</label>
-                <br>
-            </p>
+                <p>
+                    <!--<a href="{{ url_for('.word_detail', word=k, from=url_for(request.endpoint, passage_id=passage.id), create=1) }}"><span>{{ k }}</span></a> :-->
+                    <a data-toggle="modal" data-target="#myModal" onclick="{{ 'view_interpretation(\''  + k + '\')' }}"><span>{{ k }}</span></a>
+                    :
+                    <span>{{ v }}</span>
+                    &nbsp; &nbsp; &nbsp;
+                    <input type="checkbox" name="word" w="{{ k }}" id="{{ 'word_'+ k }}" value="">
+                    <label style="font-weight:normal" for="{{ 'word_'+ k }}">familiar</label>
+                    <br>
+                </p>
                 </div>
             {% endfor %}
         </div>
@@ -75,29 +69,7 @@
 <br><br><br><br><br><br><br><br><br><br>
 <p style="text-align: right"><a href="{{ url_for('voc.delete_passage', passage_id=passage.id ) }}">Delete the passage</a></p>
 
- <div class="container">
-    <!-- Modal -->
-    <div class="modal fade" id="myModal" role="dialog" >
-        <div class="modal-dialog">
 
-            <!-- Modal content-->
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Interpretation</h4>
-                </div>
-                <div class="modal-body" id="modal-body">
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-</div>
 {% endblock %}
 
 {% block scripts %}
@@ -254,9 +226,7 @@
         }
         $('#saveFamiliarWords').on('click', postFamiliarWords)
 
-          // view_interpretation('fish');
-         //  $('#myModalTest').click()
-         function view_interpretation_call(word){
+         function view_interpretation(word){
                 $.ajax({
                         url: '/voc/words_modal/'+word,
                         type: 'GET',
@@ -270,29 +240,5 @@
                     }
                 )
              }
-        $('#myModalTest').click(function (event) {
-            //如果是a链接，阻止其跳转到url页面
-            event.preventDefault();
-            //获取url的值
-            var url = '/voc/words/formidable'
-            //将id为deadAdd的页面元素作为模态框激活
-            //$('#myModal').modal();
-            //从url加载数据到模态框
-            //$('#myModal').load(url);
-            $.ajax({
-                    url: '/voc/words_modal/formidable',
-                    type: 'GET',
-                    //data: JSON.stringify(post_data),
-                    //contentType: "application/json; charset=utf-8",
-                    //dataType: "json",
-                    success: function (data) {
-                        $('#modal-body').html(data)
-                    },
-
-                }
-            )
-
-
-    })
     </script>
 {% endblock %}
