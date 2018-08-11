@@ -136,10 +136,14 @@ def craw_word(word):
 def mywords():
     page = request.args.get('page', 1, type=int)
     query = MyWord.query.filter(MyWord.user_id == current_user.id)
-    pagination = query.order_by(MyWord.created_at.desc(), MyWord.word.asc()).paginate(page, per_page=200, error_out=False)
+    search_word = request.args.get('word')
+    if search_word and search_word != 'NULL':
+        query = query.filter(MyWord.word.like('%' + search_word + '%'))
+    else:
+        search_word = 'NULL'
+    pagination = query.order_by(MyWord.word.asc(), MyWord.created_at.desc()).paginate(page, per_page=200, error_out=False)
     words = pagination.items
-    # 输出格式应该是 : { items: [ ], pages: [] }
-    return render_template('vocabulary/mywords.html', pagination=pagination, words=words, title='My words')
+    return render_template('vocabulary/mywords.html', pagination=pagination, words=words, title='My words', search_word=search_word)
 
 
 @voc.route('/add_myword', methods=['GET', 'POST'])

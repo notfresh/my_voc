@@ -15,6 +15,13 @@
 </p>
 <hr>
 <div class="post-tabs">
+    <form action="">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="word you want to search" id="searchBox" aria-describedby="searchButton">
+            <span class="input-group-addon" ><a id="searchButton"  href="javascript:void(0);">Search</a></span>
+        </div>
+        </form>
+        <br>
     <div id="familiarWords">
         <p>
             {% for word in words %}
@@ -34,7 +41,7 @@
 {% include('vocabulary/word_interpretation_modal.html') %}
 {% if pagination %}
 <div class="pagination">
-    {{ macros.pagination_widget(pagination, '.mywords') }} {# 当前蓝图下的words endpoint #}
+    {{ macros.pagination_widget(pagination, '.mywords', word=search_word) }} {# 当前蓝图下的words endpoint #}
 </div>
 {% endif %}
 {% endblock %}
@@ -90,4 +97,28 @@
      }
     $('#deleteConfirmButton').on('click', deleteFamiliarWords)
 </script>
+<script>
+        function search(){
+            searchTitle = $('#searchBox').val();
+            request_url = '/voc/mywords'
+            if (searchTitle){
+                request_url = request_url + '?word=' + searchTitle
+            }
+            window.location.href = request_url;
+        }
+        $('#searchButton').on('click',search);
+        $('#searchBox').on('keypress',function(e){
+            if(e.keyCode == 13)
+            {
+                search();
+                return false; // this line is very import, because a input field in a form will cause the form to submit
+            }
+        });
+        searchTitle = "{{ search_word | safe }}";
+        if (searchTitle != 'NULL'){
+            $('#searchBox').val( "{{ search_word }}");
+        }
+
+
+    </script>
 {% endblock %}
