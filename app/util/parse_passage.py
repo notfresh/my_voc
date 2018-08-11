@@ -82,10 +82,10 @@ def filter_my_words(dict_word, list_my_words):
         elif item.endswith('ing'):
             if item.rstrip('ing') in list_my_words:
                 dict_word.pop(item)
-            if item[-4] == item[-5]:
+            elif item[-4] == item[-5]:
                 if item[:-4] in list_my_words:
                     dict_word.pop(item)
-            if item[:-3] + 'e' in list_my_words:
+            elif item[:-3] + 'e' in list_my_words:
                 dict_word.pop(item)
         elif item.endswith('ly'):
             if item.rstrip('ly') in list_my_words:
