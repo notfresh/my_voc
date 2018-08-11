@@ -2,7 +2,7 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block page_content %}
-<div class="row align-items-center">
+<div class="row align-items-center" id="passage">
     <div class="col-md-9"><h1>{{ passage.title }}</h1></div>
     <div class="col-md-3">
         <p>
@@ -66,8 +66,10 @@
                 </div>
             {% endfor %}
         </div>
-        <p><a href="#box">view the passage</a></p>
+        <hr>
+
     </div>
+    <p><a href="#passage">view the passage</a></p>
 
 </div>
 <br><br><br><br><br><br><br><br><br><br>
