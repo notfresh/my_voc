@@ -1,8 +1,16 @@
 {% if word %}
     <h1>{{ word.word }}<small >&nbsp;&nbsp;{{ word.phonetics }}</small><br></h1>
-    <p><a href="http://dict.youdao.com/w/eng/{{word.word}}/" target="_blank">View in Youdao Dict</a></p>
-    <p><a href="https://www.collinsdictionary.com/dictionary/english/{{word.word}}" target="_blank">View in Collins Dict</a></p>
+    <p>
+        <a href="http://dict.youdao.com/w/eng/{{word.word}}/" target="_blank">View in Youdao Dict</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="https://www.collinsdictionary.com/dictionary/english/{{word.word}}" target="_blank">View in Collins Dict</a></p>
     <p><a href="{{ url_for('voc.update_word', word=word.word)}}" target="_blank">Edit </a></p>
+    {% if sentences %}
+        <h3>Sentence of word in the passage:</h3>
+            {% for item in sentences %}
+                       <p>{{item}} </p>
+            {% endfor %}
+    {% endif %}
     <ul>
        {% for item in word.interpretations%}
         <li>

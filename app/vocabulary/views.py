@@ -9,6 +9,7 @@ from app.exceptions import DataError, error_dict
 from app.models import Word, WordInterpretation, WordIPEAP, MyWord, Passage, MyUfWord, WordSet, WordSetSub
 from app.util import parse_word, word_to_str
 from app.util.parse_passage import *
+from app.util.word_sentence_in_passage import word_sentence_in_passage
 from celery_tasks.tasks import crawl
 
 from .form import CreateWordForm, UpdateWordForm, PassageForm, WordSetCreateForm, WordSetUpdateForm
@@ -43,12 +44,17 @@ def word_detail(word):
 @voc.route('/words_modal/<string:word>')
 def word_detail_modal(word):
     word_obj = Word.query.filter(Word.word == word).first()
+    passage_id = request.args.get('passage_id')
     if not word_obj:
         create_flag = request.args.get('create')
         # if create_flag:
         word_obj = Word.create_word(word)
         crawl.delay(word, 2)  # 爬单词, 调用celery并不能省略参数，或者使用默认参数。
-    return render_template('vocabulary/word_detail_modal.html', word=word_obj)
+    if passage_id:
+        passage = db.session.query(Passage.passage).filter(Passage.id == passage_id).scalar()
+        if passage:
+            sentences = word_sentence_in_passage(passage, word_obj.word)
+    return render_template('vocabulary/word_detail_modal.html', word=word_obj, sentences=sentences)
 
 
 @voc.route('/add_word', methods=['GET', 'POST'])

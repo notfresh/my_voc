@@ -55,7 +55,7 @@
             <div class="col-md-4 col-sm-12">
                 <p>
                     <!--<a href="{{ url_for('.word_detail', word=k, from=url_for(request.endpoint, passage_id=passage.id), create=1) }}"><span>{{ k }}</span></a> :-->
-                    <a data-toggle="modal" data-target="#myModal" onclick="{{ 'view_interpretation(\''  + k + '\')' }}"><span>{{ k }}</span></a>
+                    <a data-toggle="modal" data-target="#myModal" onclick="{{ 'view_interpretation(\''  + k + '\',\''+ passage.id|string +'\')' }}"><span>{{ k }}</span></a>
                     :
                     <span>{{ v }}</span>
                     &nbsp; &nbsp; &nbsp;
@@ -67,9 +67,10 @@
             {% endfor %}
         </div>
         <hr>
+        <br>
+        <p><a href="#passage">view the passage</a></p>
 
     </div>
-    <p><a href="#passage">view the passage</a></p>
 
 </div>
 <br><br><br><br><br><br><br><br><br><br>
@@ -254,9 +255,9 @@
         }
         $('#saveFamiliarWords').on('click', postFamiliarWords)
 
-         function view_interpretation(word){
+         function view_interpretation(word, passage_id){
                 $.ajax({
-                        url: '/voc/words_modal/'+word,
+                        url: '/voc/words_modal/'+word + '?passage_id=' + passage_id,
                         type: 'GET',
                         //data: JSON.stringify(post_data),
                         contentType: "application/x-www-form-urlencoded",
