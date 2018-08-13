@@ -54,6 +54,7 @@ def word_detail_modal(word):
         passage = db.session.query(Passage.passage).filter(Passage.id == passage_id).scalar()
         if passage:
             sentences = word_sentence_in_passage(passage, word_obj.word)
+            sentences = sentences[:3]
     return render_template('vocabulary/word_detail_modal.html', word=word_obj, sentences=sentences)
 
 
