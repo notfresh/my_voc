@@ -50,6 +50,7 @@ def word_detail_modal(word):
         # if create_flag:
         word_obj = Word.create_word(word)
         crawl.delay(word, 2)  # 爬单词, 调用celery并不能省略参数，或者使用默认参数。
+    sentences = None
     if passage_id:
         passage = db.session.query(Passage.passage).filter(Passage.id == passage_id).scalar()
         if passage:
