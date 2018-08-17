@@ -12,7 +12,9 @@
 </div>
 <p>
     <a href="{{ url_for('.update_passage', passage_id=passage.id) }}">update the passage</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="#vocabulary">view the vocabulary</a>
+    <a href="#vocabulary">view the vocabulary</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="javascript:void(0)" id="font-larger">A+</a>&nbsp;&nbsp;&nbsp;
+    <a href="javascript:void(0)" id="font-smaller">A-</a>&nbsp;&nbsp;&nbsp;
 </p>
 
     <br>
@@ -257,6 +259,8 @@
         }
         $('#saveFamiliarWords').on('click', postFamiliarWords)
 
+
+         // get the interpretation from the server when click the modal button.
          function view_interpretation(word, passage_id){
                 $.ajax({
                         url: '/voc/words_modal/'+word + '?passage_id=' + passage_id,
@@ -271,5 +275,52 @@
                     }
                 )
              }
+
+          // bind the click functions that adjust the font-size when click the font-size button
+          $("#font-larger").click(function () {
+                var s_size = $("#box").css("font-size"),s_number = parseFloat(s_size);
+                if(s_number<30)
+                {
+                     var newSize = s_number +2;
+                    $("#box").css("font-size", newSize);
+                }
+                else
+                    return false;
+            });
+            $("#font-smaller").click(function () {
+                var s_size = $("#box").css("font-size"),s_number = parseFloat(s_size);
+                if(s_number>14)
+                {
+                    var newSize = s_number -2;
+                    $("#box").css("font-size", newSize);
+                }
+                else
+                    return false;
+            });
+    // adjust the font-size depend of the divice.
+    function show_device() {
+
+    var userAgent = navigator.userAgent.toLowerCase();
+    var platform;
+    if (userAgent == null || userAgent == '') {
+        platform = 'WEB';
+    } else {
+        if (userAgent.indexOf("android") != -1) {
+            platform = 'ANDROID';
+        } else if (userAgent.indexOf("ios") != -1 || userAgent.indexOf("iphone") != -1 || userAgent.indexOf("ipad") != -1) {
+            platform = 'IOS';
+        } else if (userAgent.indexOf("windows phone") != -1) {
+            platform = 'WP';
+        } else {
+            platform = 'WEB';
+        }
+        return platform;
+    }
+   }
+    var device = show_device();
+    if (device != 'WEB'){
+       $("#box").css("font-size", 24);
+    }
+
     </script>
 {% endblock %}
