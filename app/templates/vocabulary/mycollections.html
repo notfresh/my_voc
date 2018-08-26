@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %} {# 这句话说明了什么? 一个html被当做python脚本来看待. 只不过在jinja模板里, 使用特定的语法 #}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_content %}
+<h1>My Collection</h1>
+<!--<hr>-->
+<!--<a id="deleteWordsButton" href="javascript:void(0);">[delete word mode]</a>-->
+    <span id="deleteConfirmButtonSpan" hidden>
+<button id="deleteConfirmButton"  class="btn btn-default">delete</button>
+    </span>
+
+</p>
+<hr>
+<div class="post-tabs">
+    <div id="familiarWords">
+        <p>
+            {% for word in words %}
+            <span class="h5">
+                <a data-toggle="modal" data-target="#myModal" onclick="{{ 'view_interpretation(\''  + word.word + '\')' }}"><span>{{ word.word }}</span></a>
+                <span class="deleteCheckbox" hidden>
+                <input type="checkbox" name="word" w="{{ word.word }}" id="{{ word.word}}" value="">
+                <label style="font-weight:normal" for="{{ word.word }}">delete</label>
+                    </span>
+            </span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+            {% endfor %}
+        </p>
+    </div>
+</div>
+{% include('vocabulary/word_interpretation_modal.html') %}
+{% if pagination %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.mycollections', word=search_word) }} {# 当前蓝图下的words endpoint #}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+<script>
+    function showDeleteCheckbox(){
+        deleteBoxes = $('span.deleteCheckbox');
+        if (deleteBoxes.is(':hidden')){
+            $('span.deleteCheckbox').show();
+            $('#deleteConfirmButtonSpan').show()
+        }else{
+            $('span.deleteCheckbox').hide();
+            $('#deleteConfirmButtonSpan').hide()
+        }
+
+    }
+    $('#deleteWordsButton').on('click', showDeleteCheckbox);
+
+
+    function deleteFamiliarWords(){
+        familiarWordsDiv = $('div#familiarWords')
+        familiarWords = familiarWordsDiv.find('[name=word]').filter(function(){
+            return $(this).is(':checked')
+        })
+        words = []
+        familiarWords.each(function(index, element){
+            words.push($(element).attr('w'))
+        })
+        url = '/voc/delete_my_familiar_word_api';
+        post_data = {
+            words: words
+        }
+        $.ajax({
+                url: url,
+                type: 'POST',
+                data: JSON.stringify(post_data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                    // delete the selected
+                    familiarWordsP = familiarWordsDiv.find('span').filter(function(){
+                        return $(this).find(':checkbox').is(':checked')
+                    });
+                    familiarWordsP.remove();
+                },
+
+            }
+         )
+     }
+    $('#deleteConfirmButton').on('click', deleteFamiliarWords)
+</script>
+<script>
+        function search(){
+            searchTitle = $('#searchBox').val();
+            request_url = '/voc/mywords'
+            if (searchTitle){
+                request_url = request_url + '?word=' + searchTitle
+            }
+            window.location.href = request_url;
+        }
+        $('#searchButton').on('click',search);
+        $('#searchBox').on('keypress',function(e){
+            if(e.keyCode == 13)
+            {
+                search();
+                return false; // this line is very import, because a input field in a form will cause the form to submit
+            }
+        });
+        searchTitle = "{{ search_word | safe }}";
+        if (searchTitle != 'NULL'){
+            $('#searchBox').val( "{{ search_word }}");
+        }
+
+
+    </script>
+{% endblock %}

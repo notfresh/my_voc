@@ -6,7 +6,8 @@ from flask_login import current_user
 
 from app import db
 from app.exceptions import DataError, error_dict
-from app.models import Word, WordInterpretation, WordIPEAP, MyWord, Passage, MyUfWord, WordSet, WordSetSub
+from app.models import Word, WordInterpretation, WordIPEAP, MyWord, Passage, MyUfWord, WordSet, WordSetSub, \
+    MyFavoriteWords
 from app.util import parse_word, word_to_str
 from app.util.parse_passage import *
 from app.util.word_sentence_in_passage import word_sentence_in_passage
@@ -44,6 +45,9 @@ def word_detail(word):
 @voc.route('/words_modal/<string:word>')
 def word_detail_modal(word):
     word_obj = Word.query.filter(Word.word == word).first()
+    favorite_obj = MyFavoriteWords.query\
+        .filter(MyFavoriteWords.word == word, MyFavoriteWords.user_id == current_user.id).first()
+    favorite = 'cancel collect' if favorite_obj else 'collect'
     passage_id = request.args.get('passage_id')
     if not word_obj:
         create_flag = request.args.get('create')
@@ -56,7 +60,7 @@ def word_detail_modal(word):
         if passage:
             sentences = word_sentence_in_passage(passage, word_obj.word)
             sentences = sentences[:3]
-    return render_template('vocabulary/word_detail_modal.html', word=word_obj, sentences=sentences)
+    return render_template('vocabulary/word_detail_modal.html', word=word_obj, sentences=sentences, favorite=favorite)
 
 
 @voc.route('/add_word', methods=['GET', 'POST'])
@@ -368,4 +372,28 @@ def word_set_detail(id):
         return render_template('vocabulary/word_set_detail.html', form=form, title=title)
 
 
+# collect a word to the collections
+@voc.route('/switch_my_favorite_word_api', methods=['POST'])
+def switch_my_favorite_word_api():
+    model = MyFavoriteWords
+    word = request.get_json().get('word')
+    action = request.get_json().get('action')
+    item_exist = db.session.query(model)\
+        .filter(model.word == word, model.user_id == current_user.id).first()
+    favorite = None
+    if not item_exist:  # 1 means collect, 0 means cancel to collect
+        model.create(word, user_id=current_user.id)
+        favorite = 'cancel collect'
+    else:
+        model.delete(word, user_id=current_user.id)
+        favorite = 'collect'
+    return jsonify({'status': 'OK', 'favorite': favorite})
 
+
+@voc.route('/mycollections', methods=['GET'])
+def mycollections():
+    page = request.args.get('page', 1, type=int)
+    query = MyFavoriteWords.query.filter(MyFavoriteWords.user_id == current_user.id)
+    pagination = query.order_by(MyFavoriteWords.word.asc(), MyFavoriteWords.created_at.desc()).paginate(page, per_page=200, error_out=False)
+    words = pagination.items
+    return render_template('vocabulary/mycollections.html', pagination=pagination, words=words, title='My Collection')

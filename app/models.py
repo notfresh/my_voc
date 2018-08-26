@@ -583,3 +583,48 @@ class MyUfWord(CommonModelMixin, db.Model): # 陌生词, unfamiliar word
         db.session.add(obj)
         db.session.flush()
         return obj
+
+
+class MyFavoriteWords(CommonModelMixin, db.Model):
+    __tablename__ = 'my_favorite_words'
+    # passage_id = db.Column(db.Integer)
+    word = db.Column(db.String(64), index=True, nullable=False)  # 一个单词.
+    user_id = db.Column(db.Integer, index=True, nullable=False)
+
+    @classmethod
+    def create(cls, word, user_id):
+        obj = cls()
+        obj.word = word
+        obj.user_id = user_id
+        db.session.add(obj)
+        db.session.flush()
+        return obj
+
+    @classmethod
+    def delete(cls, word, user_id):
+        db.session.query(cls.word == word, cls.user_id == user_id).delete()
+        db.session.flush()
+        return 1
+
+
+class MyFavoritesWordsSentences(CommonModelMixin, db.Model):
+    __tablename__ = 'my_favorite_words_st'
+    word_id = db.Column(db.Integer, index=True, nullable=False)
+    passage_id = db.Column(db.Integer)
+    sentence = db.Column(db.String(1024))  # a word can have difference sentences.
+
+    @classmethod
+    def create(cls, word_id, passage_id, sentence):
+        obj = cls()
+        obj.word_id = word_id
+        obj.passage_id = passage_id
+        obj.sentence = sentence
+        db.session.add(obj)
+        db.session.flush()
+        return obj
+
+
+
+
+
+

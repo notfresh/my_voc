@@ -3,8 +3,11 @@
     <p>
         <a href="http://dict.youdao.com/w/eng/{{word.word}}/" target="_blank">View in Youdao Dict</a>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <a href="https://www.collinsdictionary.com/dictionary/english/{{word.word}}" target="_blank">View in Collins Dict</a></p>
-    <p><a href="{{ url_for('voc.update_word', word=word.word)}}" target="_blank">Edit </a></p>
+        <a href="https://www.collinsdictionary.com/dictionary/english/{{word.word}}" target="_blank">View in Collins Dict</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a id="collect" href="javascript:void(0);" > {{favorite}} </a>
+    </p>
+    <p><a href="{{  url_for('.update_word', word=word.word) }}" target="_blank">Edit </a></p>
     {% if sentences %}
         <h3>Sentence of word in the passage:</h3>
             {% for item in sentences %}
@@ -24,6 +27,25 @@
         </li>
         {% endfor %}
     </ul>
+<script>
+        $("#collect").click(function () {
+
+            post_data = { 'word': "{{ word.word }}", 'action': 1 };
+            console.log( post_data );
+            $.ajax({
+                url: '/voc/switch_my_favorite_word_api',
+                type: 'POST',
+                data: JSON.stringify(post_data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    $("#collect").text(data.favorite)
+                }
+              }
+            )
+
+         });
+</script>
 {% else %}
-    <h1> Word not exists</h1>
+<h1> Word not exists</h1>
 {% endif %}
