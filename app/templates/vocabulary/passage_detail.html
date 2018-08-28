@@ -1,7 +1,26 @@
 {% extends "base.html" %}
 {% block title %}{{ passage.title}}{% endblock %}
 
+{%  block styles %}
+{{super()}}
+<style>
+ #bottomNav {
+ /*background:black;*/
+ z-index:999;
+ position:fixed;
+ bottom:10px;
+ right:15px; width:100px; _position:absolute;
+ _top: expression_r(documentElement.scrollTop + documentElement.clientHeight-this.offsetHeight); overflow:visible; }
+</style>
+{% endblock %}
+
 {% block page_content %}
+<div id="bottomNav">
+    <ul class="list-group">
+      <li class="list-group-item"><a href="#vocabulary">vocabulary</a></li>
+      <li class="list-group-item"><a href="#passage">passage</a></li>
+    </ul>
+</div>
 <div class="row align-items-center" id="passage">
     <div class="col-md-9"><h1>{{ passage.title }}</h1></div>
     <div class="col-md-3">
@@ -12,7 +31,7 @@
 </div>
 <p>
     <a href="{{ url_for('.update_passage', passage_id=passage.id) }}">update the passage</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="#vocabulary">view the vocabulary</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
     <a href="javascript:void(0)" id="font-larger">A+</a>&nbsp;&nbsp;&nbsp;
     <a href="javascript:void(0)" id="font-smaller">A-</a>&nbsp;&nbsp;&nbsp;
 </p>
@@ -71,14 +90,14 @@
         <hr>
         <br>
     </div>
-    <div class="col-md-12"><p><a href="#passage">view the passage</a></p></div>
+
 
 
     </div>
 
 </div>
 <br><br><br><br><br><br><br><br><br><br>
-<p style="text-align: right"><a href="{{ url_for('voc.delete_passage', passage_id=passage.id ) }}">Delete the passage</a></p>
+
 
 <div class="container">
     <!-- Modal -->
@@ -107,6 +126,8 @@
 {% block scripts %}
     {{ super() }}
     <script>
+
+        // $(document).ready(function(){    $("#f_menu").hover(function(){        $(this).text("返回顶部");    });});
 
         // 增加一个去空格的方法
         if (typeof(String.prototype.trim) === "undefined") {
