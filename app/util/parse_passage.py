@@ -94,7 +94,7 @@ def filter_my_words(dict_word, list_my_words):
         elif item.endswith('ing'):
             if item.rstrip('ing') in list_my_words:
                 dict_word.pop(item)
-            elif item[-4] == item[-5]:
+            elif len(item) >= 5 and item[-4] == item[-5]:
                 if item[:-4] in list_my_words:
                     dict_word.pop(item)
             elif item[:-3] + 'e' in list_my_words:
