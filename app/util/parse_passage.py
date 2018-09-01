@@ -39,9 +39,11 @@ def filter_word_list(list_words):
     # TODO： 这些过滤只应该发生在头或者尾
     # 过滤3， 把末尾的标点符号去掉， 比如句号
     # TODO： 连字符，也应该被过滤掉
-    list_words = [item.rstrip('.') for item in list_words]
-    list_words = [item.strip('-') for item in list_words]
     list_words = [item.strip('"') for item in list_words]
+    list_words = [item.strip('\'') for item in list_words]
+    list_words = [item.strip('.') for item in list_words]
+
+    list_words = [item.strip('-') for item in list_words]
     list_words = [item.strip('(') for item in list_words]
     list_words = [item.strip(')') for item in list_words]
     list_words = [item.rstrip(';') for item in list_words]
@@ -49,7 +51,12 @@ def filter_word_list(list_words):
     list_words = [item.rstrip(':') for item in list_words]
     list_words = [item.rstrip(',') for item in list_words]
     list_words = [item.rstrip('!') for item in list_words]
-    list_words = [item.rstrip('\'') for item in list_words] # 附属的所有格
+
+    # strip again !
+    list_words = [item.strip('"') for item in list_words]
+    list_words = [item.strip('\'') for item in list_words]
+    list_words = [item.strip('.') for item in list_words]
+
     list_words = [strip_ext(item, "'s") for item in list_words]
     # list_words = [item.strip(r'<br>') for item in list_words]
     list_words = [item.lower() for item in list_words]
