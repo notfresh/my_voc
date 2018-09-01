@@ -7,6 +7,11 @@ def passage_to_word_list(str_passage):
     str_passage = str_passage.replace('”', '"')
     str_passage = str_passage.replace('“', '"')
     str_passage = str_passage.replace('，', ',')
+    # in case of the [A] and the following word attached, so i add one more space.
+    str_passage = str_passage.replace('[A]', '[A] ')
+    str_passage = str_passage.replace('[B]', '[B] ')
+    str_passage = str_passage.replace('[C]', '[C] ')
+    str_passage = str_passage.replace('[D]', '[D] ')
     list1 = re.split(r'[\s+|/|:|,]', str_passage, flags=re.MULTILINE)
     # list1 = str_passage.split(' ')
     return list1
