@@ -385,7 +385,7 @@ def switch_my_favorite_word_api():
         model.create(word, user_id=current_user.id)
         favorite = 'cancel collect'
     else:
-        model.delete(word, user_id=current_user.id)
+        model.query.filter(model.word == word, model.user_id==current_user.id).delete()
         favorite = 'collect'
     return jsonify({'status': 'OK', 'favorite': favorite})
 
