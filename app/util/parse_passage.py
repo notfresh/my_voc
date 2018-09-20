@@ -32,8 +32,13 @@ def digit_in_str(str1):
         return False
 
 
+def judge_pure_english(keyword):
+    return all(ord(c) < 128 for c in keyword)
+
+
 def filter_word_list(list_words):
     list_words = [item for item in list_words if item and len(item)>=3 and not digit_in_str(item)]
+    list_words = [item for item in list_words if judge_pure_english(item)] # only english will be left.
     # 过滤2， 把末尾的标点符号去掉， 比如逗号
     # TODO: 这些过滤应该整合起来,
     # TODO： 这些过滤只应该发生在头或者尾
