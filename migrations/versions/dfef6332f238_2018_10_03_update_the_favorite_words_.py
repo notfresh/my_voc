@@ -26,8 +26,8 @@ def upgrade():
     op.drop_index('ix_my_favorite_words_st_passage_id', table_name='my_favorite_words_st')
     op.drop_index('ix_my_favorite_words_st_word_id', table_name='my_favorite_words_st')
     op.drop_column('my_favorite_words_st', 'word_id')
-    op.create_index(op.f('ix_mywords_set_id'), 'mywords', ['set_id'], unique=False)
-    op.drop_index('ix_mywords_set', table_name='mywords')
+    # op.create_index(op.f('ix_mywords_set_id'), 'mywords', ['set_id'], unique=False)
+    # op.drop_index('ix_mywords_set', table_name='mywords')
     # ### end Alembic commands ###
 
 
@@ -43,6 +43,6 @@ def downgrade():
     op.alter_column('my_favorite_words_st', 'passage_id',
                existing_type=mysql.INTEGER(display_width=11),
                nullable=False)
-    op.drop_column('my_favorite_words_st', 'word')
-    op.drop_column('my_favorite_words_st', 'user_id')
+    # op.drop_column('my_favorite_words_st', 'word')
+    # op.drop_column('my_favorite_words_st', 'user_id')
     # ### end Alembic commands ###
