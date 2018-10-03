@@ -609,14 +609,24 @@ class MyFavoriteWords(CommonModelMixin, db.Model):
 
 class MyFavoritesWordsSentences(CommonModelMixin, db.Model):
     __tablename__ = 'my_favorite_words_st'
-    word_id = db.Column(db.Integer, index=True, nullable=False)
+    word = db.Column(db.String(64), index=True, nullable=False)
     passage_id = db.Column(db.Integer)
     sentence = db.Column(db.String(1024))  # a word can have difference sentences.
+    user_id = db.Column(db.Integer, index=True, nullable=False)
 
     @classmethod
-    def create(cls, word_id, passage_id, sentence):
+    def create(cls, user_id, word, passage_id, sentence):
+        """
+        收藏一个句子的收藏人，单词，文章ID，句子， 刚好形成一个完备的结构，目前先不排除重复的。相加就加
+        :param user_id:
+        :param word:
+        :param passage_id:
+        :param sentence:
+        :return:
+        """
         obj = cls()
-        obj.word_id = word_id
+        obj.user_id = user_id
+        obj.word = word
         obj.passage_id = passage_id
         obj.sentence = sentence
         db.session.add(obj)

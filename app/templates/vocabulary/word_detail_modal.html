@@ -8,10 +8,13 @@
         <a id="collect" href="javascript:void(0);" > {{favorite}} </a>
     </p>
     <p><a href="{{  url_for('.update_word', word=word.word) }}" target="_blank">Edit </a></p>
+    <p><a href="javascript:void(0)" onclick="view_sentences( '{{ word.word }}' );" ><span style="font-style:italic;">View Sentences</span></a></p>
     {% if sentences %}
         <h3>Sentence of word in the passage:</h3>
             {% for item in sentences %}
-                       <p>{{item}} </p>
+               <p><span class="sentence">{{item}}</span>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0);" onclick="collect_sentence(this)"><span style="font-style:italic;">Collect</span></a>
+               </p>
             {% endfor %}
     {% endif %}
     <p class="h3"> Interpratations: </p>
@@ -45,6 +48,25 @@
             )
 
          });
+
+         function collect_sentence(e) {
+            word = '{{ word.word }}';
+            passage_id = '{{ ext_args.get('passage_id') }}';
+            sentence = $(e).parents('p').find('.sentence').text();
+            post_data = { 'word': "{{ word.word }}", 'passage_id': passage_id, 'sentence': sentence };
+            console.log( post_data );
+            $.ajax({
+                url: '/voc/collect_sentence',
+                type: 'POST',
+                data: JSON.stringify(post_data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    alert(data.favorite)
+                }
+              }
+            )
+         };
 </script>
 {% else %}
 <h1> Word not exists</h1>

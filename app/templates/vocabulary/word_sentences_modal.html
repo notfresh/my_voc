@@ -1,0 +1,18 @@
+{% if sentences %}
+    <h1>{{ word.word }}</h1>
+    <p class="h3"> sentences: </p>
+    <ul>
+       {% for item in sentences%}
+        <li>
+            <p class="h5" ><span style="font-style: italic">{{ item.passage_title }} </span>{{item.interpretation }} </p>
+            <p>{{ item.sentence }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+<script>
+
+
+</script>
+{% else %}
+<h1> Sentences not exist</h1>
+{% endif %}

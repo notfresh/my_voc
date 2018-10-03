@@ -7,7 +7,7 @@ from flask_login import current_user
 from app import db
 from app.exceptions import DataError, error_dict
 from app.models import Word, WordInterpretation, WordIPEAP, MyWord, Passage, MyUfWord, WordSet, WordSetSub, \
-    MyFavoriteWords
+    MyFavoriteWords, MyFavoritesWordsSentences
 from app.util import parse_word, word_to_str
 from app.util.parse_passage import *
 from app.util.word_sentence_in_passage import word_sentence_in_passage
@@ -36,7 +36,7 @@ def word_detail(word):
         create_flag = request.args.get('create')
         if create_flag:
             word_obj = Word.create_word(word)
-            crawl.delay(word, 2)  # 爬单词, 调用celery并不能省略参数，或者使用默认参数。
+            # crawl.delay(word, 2)  # 爬单词, 调用celery并不能省略参数，或者使用默认参数。
             flash('creating and crawling word in the background')
         return redirect(from_url if from_url else url_for('main.index'))  # go back.
     return render_template('vocabulary/word_detail.html', word=word_obj)
@@ -45,22 +45,25 @@ def word_detail(word):
 @voc.route('/words_modal/<string:word>')
 def word_detail_modal(word):
     word_obj = Word.query.filter(Word.word == word).first()
-    favorite_obj = MyFavoriteWords.query\
+    favorite_obj = MyFavoriteWords.query \
         .filter(MyFavoriteWords.word == word, MyFavoriteWords.user_id == current_user.id).first()
     favorite = 'cancel collect' if favorite_obj else 'collect'
-    passage_id = request.args.get('passage_id')
     if not word_obj:
         create_flag = request.args.get('create')
         # if create_flag:
         word_obj = Word.create_word(word)
         crawl.delay(word, 2)  # 爬单词, 调用celery并不能省略参数，或者使用默认参数。
+    passage_id = request.args.get('passage_id')
     sentences = None
+    ext_args = {}
     if passage_id:
+        ext_args['passage_id'] = passage_id
         passage = db.session.query(Passage.passage).filter(Passage.id == passage_id).scalar()
         if passage:
             sentences = word_sentence_in_passage(passage, word_obj.word)
             sentences = sentences[:3]
-    return render_template('vocabulary/word_detail_modal.html', word=word_obj, sentences=sentences, favorite=favorite)
+    return render_template('vocabulary/word_detail_modal.html', word=word_obj, sentences=sentences, favorite=favorite, \
+                           ext_args=ext_args)
 
 
 @voc.route('/add_word', methods=['GET', 'POST'])
@@ -399,3 +402,28 @@ def mycollections():
     pagination = query.order_by(MyFavoriteWords.word.asc(), MyFavoriteWords.created_at.desc()).paginate(page, per_page=200, error_out=False)
     words = pagination.items
     return render_template('vocabulary/mycollections.html', pagination=pagination, words=words, title='My Collection')
+
+
+# 创建一个点击收藏例句的功能。
+@voc.route('/collect_sentence', methods=['POST'])
+def collect_sentence():
+    data = request.get_json()
+    word = data.get('word')
+    passage_id = data.get('passage_id')
+    sentence = data.get('sentence')
+    model = MyFavoritesWordsSentences
+    model.create(user_id=current_user.id, word=word, passage_id=passage_id, sentence=sentence)
+    favorite = 'collect'
+    return jsonify({'status': 'OK', 'favorite': favorite})
+
+
+# 查看所有的收藏的例句。
+@voc.route('/word_sentences/<string:word>')
+def word_sentences(word):
+    model = MyFavoritesWordsSentences
+    sentences = db.session.query(model.sentence, model.word, Passage.title.label('passage_title')).join(Passage, model.passage_id == Passage.id)\
+        .filter(model.user_id == current_user.id, model.word == word).all()
+    return render_template('vocabulary/word_sentences_modal.html', word=word, sentences=sentences)
+
+
+
