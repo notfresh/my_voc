@@ -1,20 +1,10 @@
- <div class="container">
-     <script>
-         /* function view_interpretation(word){
-                $.ajax({
-                        url: '/voc/words_modal/'+word,
-                        type: 'GET',
-                        //data: JSON.stringify(post_data),
-                        contentType: "application/x-www-form-urlencoded",
-                        //dataType: "json",
-                        success: function (data) {
-                            $('#modal-body').html(data)
-                        },
-
-                    }
-                )
-             }
-           */
+<div class="container">
+    <style>
+        .modal-dialog{
+          width:80%;
+        }
+    </style>
+    <script>
 
          // get the interpretation from the server when click the modal button.
          function view_interpretation(word, passage_id){
@@ -41,7 +31,7 @@
                         contentType: "application/x-www-form-urlencoded",
                         //dataType: "json",
                         success: function (data) {
-                            $('#modal-body').html(data)
+                            $('#modal-body2').html(data);
                         },
 
                     }
@@ -50,15 +40,19 @@
 
 
 
-     </script>
-    <div class="modal fade" id="myModal" role="dialog" >
-        <div class="modal-dialog">
+    </script>
+
+
+
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-lg">
 
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Modal</h4>
+                    <h4 class="modal-title">Interpretation</h4>
                 </div>
                 <div class="modal-body" id="modal-body">
 
@@ -71,4 +65,28 @@
         </div>
     </div>
 
+        <div class="modal fade" id="sentence_modal" role="dialog">
+        <div class="modal-dialog modal-lg">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Sentences</h4>
+                </div>
+                <div class="modal-body" id="modal-body2">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+
 </div>
+

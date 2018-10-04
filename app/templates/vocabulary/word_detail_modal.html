@@ -1,14 +1,14 @@
 {% if word %}
     <h1>{{ word.word }}<small >&nbsp;&nbsp;{{ word.phonetics }}</small><br></h1>
     <p>
+        <a href="{{  url_for('.update_word', word=word.word) }}" target="_blank">Edit </a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <a href="http://dict.youdao.com/w/eng/{{word.word}}/" target="_blank">View in Youdao Dict</a>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <a href="https://www.collinsdictionary.com/dictionary/english/{{word.word}}" target="_blank">View in Collins Dict</a>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <a id="collect" href="javascript:void(0);" > {{favorite}} </a>
     </p>
-    <p><a href="{{  url_for('.update_word', word=word.word) }}" target="_blank">Edit </a></p>
-    <p><a href="javascript:void(0)" onclick="view_sentences( '{{ word.word }}' );" ><span style="font-style:italic;">View Sentences</span></a></p>
+    <p><a href="#sentence_modal" data-toggle="modal" onclick="view_sentences( '{{ word.word }}' );" ><span style="font-style:italic;">View Sentences</span></a></p>
     {% if sentences %}
         <h3>Sentence of word in the passage:</h3>
             {% for item in sentences %}
