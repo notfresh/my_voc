@@ -8,7 +8,9 @@
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <a id="collect" href="javascript:void(0);" > {{favorite}} </a>
     </p>
-    <p><a href="#sentence_modal" data-toggle="modal" onclick="view_sentences( '{{ word.word }}' );" ><span style="font-style:italic;">View Sentences</span></a></p>
+    {% if ext_args.get('collected_st_exist') %}
+        <p><a href="#sentence_modal" data-toggle="modal" onclick="view_sentences( '{{ word.word }}' );" ><span style="font-style:italic;">View Sentences</span></a></p>
+    {% endif %}
     {% if sentences %}
         <h3>Sentence of word in the passage:</h3>
             {% for item in sentences %}

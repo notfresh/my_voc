@@ -62,6 +62,12 @@ def word_detail_modal(word):
         if passage:
             sentences = word_sentence_in_passage(passage, word_obj.word)
             sentences = sentences[:3]
+    # check if collected sentence exists
+    # model = MyFavoritesWordsSentences
+    # collected_st_exist = db.session.query(model.sentence).join(Passage, model.passage_id == Passage.id) \
+    #     .filter(model.user_id == current_user.id, model.word == word).count()
+    # ext_args['collected_st_exist'] = collected_st_exist
+
     return render_template('vocabulary/word_detail_modal.html', word=word_obj, sentences=sentences, favorite=favorite, \
                            ext_args=ext_args)
 
