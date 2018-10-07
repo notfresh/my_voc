@@ -8,7 +8,6 @@
 
          // get the interpretation from the server when click the modal button.
          function view_interpretation(word, passage_id){
-                alert(11);
                 $.ajax({
                         url: '/voc/words_modal/'+word + '?passage_id=' + passage_id,
                         type: 'GET',
