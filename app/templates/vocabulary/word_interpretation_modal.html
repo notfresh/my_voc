@@ -12,9 +12,11 @@
                         url: '/voc/words_modal/'+word + '?passage_id=' + passage_id,
                         type: 'GET',
                         //data: JSON.stringify(post_data),
-                        contentType: "application/x-www-form-urlencoded",
-                        //dataType: "json",
+                        // contentType: "application/json",
+                        // contentType: "application/x-www-form-urlencoded",
+                        dataType: "html",
                         success: function (data) {
+                            console.log(data);
                             $('#modal-body').html(data)
                         },
 
@@ -28,8 +30,9 @@
                 $.ajax({
                         url: '/voc/word_sentences/'+word,
                         type: 'GET',
-                        contentType: "application/x-www-form-urlencoded",
-                        //dataType: "json",
+                        // contentType: "application/x-www-form-urlencoded",
+                        contentType: "application/json",
+                        // dataType: "json",
                         success: function (data) {
                             $('#modal-body2').html(data);
                         },
