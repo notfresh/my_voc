@@ -19,5 +19,13 @@ def next_char(str1, substr1):
     return next_char
 
 
+def before_char(str1, substr1):
+    index = str1.index(substr1)
+    if index == 0:
+        return '#'
+    next_char = str1[index-1]
+    return next_char
+
+
 print('*'*10)
-print(next_char(str1, 'applepie'))
+print(before_char(str1, 'a'))
