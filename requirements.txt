@@ -32,7 +32,7 @@ Flask-WTF==0.14.2
 ForgeryPy==0.1
 gunicorn==19.9.0
 html5lib==1.0b3
-httpie==0.7.2
+httpie==1.0.3
 hyperlink==18.0.0
 idna==2.7
 incremental==17.5.0
